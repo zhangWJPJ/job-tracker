@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>秋招投递管理助手</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--app-font-family, "Times New Roman", "楷体_GB2312", "KaiTi_GB2312", "STKaiti", serif); background: #f0f4f8; color: #1f2937; font-size: 14px; }
+.app { min-height: 100vh; }
+.header { background: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; color: #1e40af; }
+.logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
+.nav { display: flex; gap: 8px; }
+.nav button { padding: 8px 16px; border: none; background: transparent; cursor: pointer; font-size: 14px; color: #6b7280; border-radius: 6px; transition: all 0.2s; }
+.nav button:hover { background: #f3f4f6; }
+.nav button.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+.btn-primary { background: #2563eb; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-secondary { background: #fff; color: #374151; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.btn-secondary:hover { background: #f9fafb; }
+.btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.btn-danger:hover { background: #fecaca; }
+.container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+.page { display: none; }
+.page.active { display: block; }
+.hero { background: linear-gradient(135deg, #eff6ff, #dbeafe); padding: 32px; border-radius: 12px; margin-bottom: 24px; transition: all 0.3s ease; overflow: hidden; }
+.hero h1 { font-size: 28px; color: #1e3a8a; margin-bottom: 8px; transition: all 0.3s ease; }
+.hero p { color: #64748b; font-size: 15px; transition: all 0.3s ease; }
+.hero.collapsed { padding: 12px 32px; margin-bottom: 16px; }
+.hero.collapsed h1 { font-size: 18px; margin-bottom: 0; }
+.hero.collapsed p { display: none; }
+tr.row-rejected { background: #e5e7eb !important; }
+tr.row-rejected:hover { background: #d1d5db !important; }
+tr.row-rejected td { color: #6b7280; }
+.drag-item { cursor: grab; user-select: none; }
+.drag-item:active { cursor: grabbing; }
+.drag-item.dragging { opacity: 0.4; }
+.drag-item.drag-over { border-top: 2px solid #3b82f6; }
+.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.stat-label { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 700; color: #1f2937; }
+.stat-card.blue .stat-value { color: #2563eb; }
+.stat-card.orange .stat-value { color: #f59e0b; }
+.stat-card.indigo .stat-value { color: #4f46e5; }
+.stat-card.green .stat-value { color: #10b981; }
+.stat-card.purple .stat-value { color: #8b5cf6; }
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.chart-card h3 { font-size: 16px; margin-bottom: 16px; color: #374151; }
+.chart-bar { display: flex; align-items: center; margin-bottom: 8px; gap: 10px; }
+.chart-bar-label { width: 80px; font-size: 12px; color: #6b7280; text-align: right; flex-shrink: 0; }
+.chart-bar-track { flex: 1; height: 20px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
+.chart-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.chart-bar-value { width: 30px; font-size: 12px; color: #374151; font-weight: 600; }
+.table-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
+.table-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f3f4f6; }
+.table-header h2 { font-size: 18px; color: #1f2937; }
+.toolbar { padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f3f4f6; }
+.search-box { flex: 1; max-width: 320px; position: relative; }
+.search-box input { width: 100%; padding: 8px 12px 8px 36px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; outline: none; }
+.search-box input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+.record-count { color: #6b7280; font-size: 13px; margin-left: auto; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+thead th { background: #f8fafc; padding: 12px 10px; text-align: left; font-size: 14px; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; position: relative; user-select: none; }
+th.filterable { cursor: pointer; }
+th.filterable:hover { background: #f1f5f9; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { background: #f1f5f9; }
+.sort-icon { margin-left: 4px; font-size: 12px; color: #2563eb; font-weight: bold; }
+.filter-icon { margin-left: 4px; font-size: 12px; color: #9ca3af; }
+th.filtered .filter-icon { color: #2563eb; }
+.col-resizer { position: absolute; right: 0; top: 0; width: 6px; height: 100%; cursor: col-resize; user-select: none; z-index: 10; }
+.col-resizer:hover, .col-resizer.active { background: #3b82f6; opacity: 0.5; }
+tbody td { padding: 12px 10px; border-bottom: 1px solid #f3f4f6; font-size: var(--table-font-size, 13px); color: #374151; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+tbody tr:hover { background: #f8fafc; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.9em; font-weight: 500; white-space: nowrap; }
+.badge a { color: inherit; text-decoration: none; }
+.badge a:hover { text-decoration: underline; }
+/* 默认颜色 */
+.s-已投递 { background: #f3f4f6; color: #6b7280; }
+.s-简历筛选 { background: #ede9fe; color: #7c3aed; }
+.s-测评 { background: #fef3c7; color: #b45309; }
+.s-笔试 { background: #ffedd5; color: #c2410c; }
+.s-一面 { background: #dbeafe; color: #1d4ed8; }
+.s-二面 { background: #dbeafe; color: #1e40af; }
+.s-三面\/终面 { background: #c7d2fe; color: #3730a3; }
+.s-Offer { background: #d1fae5; color: #047857; }
+.s-已拒绝 { background: #fee2e2; color: #b91c1c; }
+.s-已挂 { background: #374151; color: #f3f4f6; }
+.c-官网 { background: #dbeafe; color: #1d4ed8; }
+.c-牛客 { background: #d1fae5; color: #047857; }
+.c-BOSS直聘 { background: #cffafe; color: #0e7490; }
+.c-猎聘 { background: #ffedd5; color: #c2410c; }
+.c-前程无忧 { background: #ede9fe; color: #6d28d9; }
+.c-智联招聘 { background: #fce7f3; color: #be185d; }
+.c-内推 { background: #fee2e2; color: #b91c1c; }
+.c-其他 { background: #f3f4f6; color: #6b7280; }
+.b-校招 { background: #e0e7ff; color: #4338ca; }
+.b-实习 { background: #ccfbf1; color: #0f766e; }
+.b-社招 { background: #fef3c7; color: #b45309; }
+.b-其他 { background: #f1f5f9; color: #475569; }
+.custom-badge { background: #fef3c7; color: #92400e; }
+/* 边框样式 */
+.bs-none .badge { border: none; }
+.bs-capsule .badge { border: 1.5px solid rgba(0,0,0,0.15); border-radius: 20px; padding: 4px 14px; }
+.bs-soft .badge { border: none; border-radius: 10px; padding: 4px 12px; }
+.bs-card .badge { border: 1px solid rgba(0,0,0,0.18); border-radius: 4px; padding: 3px 10px; }
+.bs-solid .badge { border: none; border-radius: 20px; padding: 5px 16px; font-weight: 600; }
+.action-btns { display: flex; gap: 8px; }
+.icon-btn { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 16px; color: #6b7280; transition: all 0.2s; }
+.icon-btn:hover { background: #f3f4f6; color: #2563eb; }
+.icon-btn.delete:hover { color: #ef4444; }
+.empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
+.empty-state .plus-icon { width: 60px; height: 60px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px; }
+.empty-state h3 { font-size: 18px; color: #374151; margin-bottom: 8px; }
+.empty-state p { margin-bottom: 20px; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: #fff; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
+.modal-header h3 { font-size: 18px; color: #1f2937; }
+.modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #9ca3af; line-height: 1; }
+.modal-body { padding: 24px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; font-family: inherit; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.select-with-add { display: flex; gap: 6px; align-items: center; }
+.select-with-add select { flex: 1; }
+.add-opt-btn { width: 32px; height: 32px; flex-shrink: 0; border: 1px solid #d1d5db; background: #fff; border-radius: 6px; cursor: pointer; font-size: 16px; color: #6b7280; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.add-opt-btn:hover { background: #eff6ff; border-color: #3b82f6; color: #2563eb; }
+.inline-input { width: 100%; padding: 6px 10px; border: 1px solid #3b82f6; border-radius: 6px; font-size: 13px; outline: none; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; gap: 10px; }
+.history-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #f3f4f6; }
+.history-section h4 { font-size: 15px; margin-bottom: 12px; color: #374151; }
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before { content: ''; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: #e5e7eb; }
+.timeline-item { position: relative; margin-bottom: 16px; }
+.timeline-item::before { content: ''; position: absolute; left: -21px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; border: 2px solid #fff; box-shadow: 0 0 0 2px #3b82f6; }
+.timeline-item.current::before { background: #10b981; box-shadow: 0 0 0 2px #10b981; }
+.history-edit { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #f9fafb; padding: 10px; border-radius: 6px; }
+.history-edit select, .history-edit input { padding: 5px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; }
+.history-edit .note-input { flex: 1; min-width: 120px; }
+.history-actions { display: flex; gap: 4px; }
+.history-actions button { padding: 4px 8px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; }
+.btn-del-sm { background: #fee2e2; color: #b91c1c; }
+.add-history-btn { margin-top: 8px; padding: 6px 12px; background: #f3f4f6; border: 1px dashed #d1d5db; border-radius: 6px; cursor: pointer; font-size: 13px; color: #6b7280; width: 100%; }
+.add-history-btn:hover { background: #e5e7eb; color: #374151; }
+.filter-dropdown { position: fixed; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; min-width: 160px; padding: 8px 0; display: none; max-height: 300px; overflow-y: auto; }
+.filter-dropdown.show { display: block; }
+.filter-option { padding: 6px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.filter-option:hover { background: #f3f4f6; }
+.io-card { background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; }
+.io-card h3 { font-size: 16px; margin-bottom: 12px; color: #374151; }
+.io-card p { color: #6b7280; font-size: 13px; margin-bottom: 16px; }
+.io-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+.trend-chart { display: flex; align-items: flex-end; gap: 8px; height: 150px; padding: 10px 0; }
+.trend-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.trend-bar-fill { width: 100%; background: #3b82f6; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s; }
+.trend-bar-label { font-size: 11px; color: #9ca3af; }
+.settings-section { margin-bottom: 28px; }
+.settings-section h3 { font-size: 16px; color: #1f2937; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; }
+.setting-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.setting-row .setting-label { width: 120px; flex-shrink: 0; font-size: 13px; color: #6b7280; padding-top: 8px; }
+.setting-row .setting-control { flex: 1; }
+.setting-row .setting-control input[type=text] { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+.setting-hint { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+.opt-color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; }
+.opt-color-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #f9fafb; border-radius: 6px; }
+.opt-color-item .color-preview { width: 24px; height: 24px; border-radius: 4px; border: 1px solid #e5e7eb; flex-shrink: 0; cursor: pointer; }
+.opt-color-item .opt-name { font-size: 12px; color: #374151; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opt-color-item .del-btn { background: none; border: none; cursor: pointer; color: #ef4444; font-size: 14px; padding: 0 2px; opacity: 0.5; }
+.opt-color-item .del-btn:hover { opacity: 1; }
+.opt-color-item .del-btn.hidden { visibility: hidden; }
+.border-style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
+.border-style-card { padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s; background: #fff; }
+.border-style-card:hover { border-color: #93c5fd; }
+.border-style-card.active { border-color: #2563eb; background: #eff6ff; }
+.border-style-card .bs-preview { display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 12px; margin-bottom: 6px; background: #dbeafe; color: #1d4ed8; }
+.border-style-card .bs-name { font-size: 12px; color: #6b7280; }
+.path-display { background: #f9fafb; padding: 10px 12px; border-radius: 6px; font-family: monospace; font-size: 12px; color: #374151; word-break: break-all; margin-bottom: 8px; }
+.add-opt-row { display: flex; gap: 6px; margin-bottom: 10px; }
+.add-opt-row input { flex: 1; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="app" id="appRoot">
+  <div class="header">
+    <div class="logo"><div class="logo-icon">📋</div>求职投递管家</div>
+    <div class="nav">
+      <button class="active" data-page="records">📋 投递记录</button>
+      <button data-page="stats">📊 数据统计</button>
+      <button data-page="io">📁 导入导出</button>
+      <button data-page="settings">⚙️ 设置</button>
+    </div>
+    <button class="btn-primary" onclick="openModal()">+ 新增投递</button>
+  </div>
+  <div class="container">
+    <div class="page active" id="page-records">
+      <div class="hero">
+        <h1>秋招投递管理</h1>
+        <p>一站式管理你的求职投递记录，追踪进度，洞察通过率</p>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <h2>投递记录</h2>
+          <button class="btn-primary" onclick="openModal()">+ 新增投递</button>
+        </div>
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="搜索公司 / 岗位 / 地点" oninput="renderTable()">
+          </div>
+          <span class="record-count" id="recordCount">共 0 条记录</span>
+        </div>
+        <div class="table-wrap">
+          <table id="recordsTable">
+            <thead>
+              <tr>
+                <th class="filterable" data-col="company" data-width="160">公司名称<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th data-col="position" data-width="180">岗位<div class="col-resizer"></div></th>
+                <th class="filterable" data-col="channel" data-width="110">渠道<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th class="filterable" data-col="batch" data-width="80">批次<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th class="sortable" data-col="date" data-width="110" onclick="toggleDateSort()">投递日期<span class="sort-icon" id="dateSortIcon">↓</span><div class="col-resizer"></div></th>
+                <th class="filterable" data-col="status" data-width="100">状态<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th data-col="salary" data-width="80">薪资<div class="col-resizer"></div></th>
+                <th class="filterable" data-col="location" data-width="80">地点<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th data-col="actions" data-width="80">操作<div class="col-resizer"></div></th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="emptyState" style="display:none">
+          <div class="plus-icon">+</div>
+          <h3>还没有投递记录</h3>
+          <p>添加第一条投递记录，开始管理你的秋招进度</p>
+          <button class="btn-primary" onclick="openModal()">+ 添加第一条投递</button>
+        </div>
+      </div>
+    </div>
+    <div class="page" id="page-stats">
+      <div class="hero">
+        <h1>数据统计</h1>
+        <p>全面了解你的投递进度和通过率</p>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="charts-row">
+        <div class="chart-card"><h3>状态分布</h3><div id="statusChart"></div></div>
+        <div class="chart-card"><h3>近7天投递趋势</h3><div class="trend-chart" id="trendChart"></div></div>
+      </div>
+    </div>
+    <div class="page" id="page-io">
+      <div class="hero">
+        <h1>导入导出</h1>
+        <p>备份和恢复你的投递数据</p>
+      </div>
+      <div class="io-card">
+        <h3>导出数据</h3>
+        <p>将所有投递记录导出为文件，建议定期备份</p>
+        <div class="io-buttons">
+          <button class="btn-secondary" onclick="exportJSON()">导出 JSON（完整备份）</button>
+          <button class="btn-secondary" onclick="exportCSV()">导出 CSV（Excel表格）</button>
+        </div>
+      </div>
+      <div class="io-card">
+        <h3>导入数据</h3>
+        <p>从 JSON 备份文件恢复数据（会覆盖当前数据）</p>
+        <div class="io-buttons">
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+          <button class="btn-secondary" onclick="document.getElementById('importFile').click()">选择 JSON 文件导入</button>
+        </div>
+      </div>
+    </div>
+    <div class="page" id="page-settings">
+      <div class="hero">
+        <h1>设置</h1>
+        <p>自定义应用配置、选项颜色和标签样式</p>
+      </div>
+      <div class="io-card">
+        <div class="settings-section">
+          <h3>📂 数据存储</h3>
+          <div class="setting-row">
+            <div class="setting-label">当前存储位置</div>
+            <div class="setting-control">
+              <div class="path-display" id="currentDataPath"></div>
+              <div style="display:flex;gap:8px">
+                <input type="text" id="newDataPath" placeholder="只填文件夹路径，如 D:\JobTracker（不要加引号和文件名）">
+                <button class="btn-secondary" onclick="changeDataPath()">修改</button>
+                <button class="btn-secondary" onclick="openDataFolder()">打开文件夹</button>
+              </div>
+              <div class="setting-hint">只填文件夹路径即可，程序会自动创建 job_data.json；支持带引号或带文件名的路径，会自动识别</div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>🔤 字体设置</h3>
+          <div class="setting-row">
+            <div class="setting-label">英文字体</div>
+            <div class="setting-control" style="padding-top:8px">
+              <select id="fontEnSelect" onchange="setFontEn(this.value)" style="width:280px;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none">
+              </select>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">中文字体</div>
+            <div class="setting-control" style="padding-top:8px">
+              <select id="fontCnSelect" onchange="setFontCn(this.value)" style="width:280px;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none">
+              </select>
+              <div class="setting-hint">英文和中文字体可分别独立设置，实时生效</div>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">字号大小</div>
+            <div class="setting-control" style="padding-top:8px">
+              <div style="display:flex;align-items:center;gap:12px">
+                <input type="range" id="fontSizeSlider" min="12" max="50" step="1" value="13" oninput="setFontSize(this.value)" style="width:280px">
+                <span id="fontSizeValue" style="font-weight:600;color:#2563eb;min-width:40px">13px</span>
+              </div>
+              <div class="setting-hint">拖动滑块调整投递记录表格的字体大小（12px - 50px），实时生效并自动保存</div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>🎨 标签边框样式</h3>
+          <div class="setting-row">
+            <div class="setting-label">边框风格</div>
+            <div class="setting-control">
+              <div class="border-style-grid" id="borderStyleGrid"></div>
+              <div class="setting-hint">一键切换所有标签（渠道/批次/状态）的边框样式</div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>🏷️ 投递渠道 - 选项与颜色</h3>
+          <div class="setting-row">
+            <div class="setting-label">管理选项</div>
+            <div class="setting-control">
+              <div class="add-opt-row">
+                <input type="text" id="newChannelOpt" placeholder="输入新渠道名称，回车添加" onkeydown="if(event.key==='Enter')addCustomOption('channel')">
+                <button class="btn-secondary" onclick="addCustomOption('channel')">添加</button>
+              </div>
+              <div class="opt-color-grid" id="channelColorGrid"></div>
+              <div class="setting-hint">点击颜色块可修改该选项的标签颜色，× 删除自定义选项（系统默认不可删）</div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>📦 投递批次 - 选项与颜色</h3>
+          <div class="setting-row">
+            <div class="setting-label">管理选项</div>
+            <div class="setting-control">
+              <div class="add-opt-row">
+                <input type="text" id="newBatchOpt" placeholder="输入新批次名称，回车添加" onkeydown="if(event.key==='Enter')addCustomOption('batch')">
+                <button class="btn-secondary" onclick="addCustomOption('batch')">添加</button>
+              </div>
+              <div class="opt-color-grid" id="batchColorGrid"></div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>📊 当前状态 - 选项与颜色</h3>
+          <div class="setting-row">
+            <div class="setting-label">管理选项</div>
+            <div class="setting-control">
+              <div class="add-opt-row">
+                <input type="text" id="newStatusOpt" placeholder="输入新状态名称，回车添加" onkeydown="if(event.key==='Enter')addCustomOption('status')">
+                <button class="btn-secondary" onclick="addCustomOption('status')">添加</button>
+              </div>
+              <div class="opt-color-grid" id="statusColorGrid"></div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>⚠️ 数据管理</h3>
+          <div class="setting-row">
+            <div class="setting-label">清空数据</div>
+            <div class="setting-control">
+              <button class="btn-danger" onclick="clearAllData()">清空所有投递记录</button>
+              <div class="setting-hint">此操作不可恢复，请先导出备份</div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section" style="margin-bottom:0">
+          <h3>ℹ️ 关于</h3>
+          <div class="setting-row">
+            <div class="setting-label">软件名称</div>
+            <div class="setting-control" style="padding-top:8px;color:#1f2937;font-size:14px;font-weight:600">秋招投递管理助手</div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">版本</div>
+            <div class="setting-control" style="padding-top:8px;color:#6b7280;font-size:13px">v1.5.0</div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">开发者</div>
+            <div class="setting-control" style="padding-top:8px;color:#2563eb;font-size:14px;font-weight:600">只想睡好觉</div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">GitHub</div>
+            <div class="setting-control" style="padding-top:8px;font-size:13px"><a href="https://github.com/zhangWJPJ/job-tracker" target="_blank" style="color:#2563eb;text-decoration:none">github.com/zhangWJPJ/job-tracker</a></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">说明</div>
+            <div class="setting-control" style="padding-top:8px;color:#9ca3af;font-size:12px">数据完全本地存储，无需联网，开源免费</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">新增投递</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>公司名称 *</label><input type="text" id="f_company" placeholder="如：小米"></div>
+        <div class="form-group"><label>岗位名称 *</label><input type="text" id="f_position" placeholder="如：产品经理"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>投递渠道</label><div class="select-with-add" id="swa_channel"><select id="f_channel"></select><button class="add-opt-btn" onclick="showInlineAdd('channel')" title="添加自定义渠道">+</button></div></div>
+        <div class="form-group"><label>投递批次</label><div class="select-with-add" id="swa_batch"><select id="f_batch"></select><button class="add-opt-btn" onclick="showInlineAdd('batch')" title="添加自定义批次">+</button></div></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>投递日期</label><input type="date" id="f_date"></div>
+        <div class="form-group"><label>当前状态</label><div class="select-with-add" id="swa_status"><select id="f_status"></select><button class="add-opt-btn" onclick="showInlineAdd('status')" title="添加自定义状态">+</button></div></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>薪资范围</label><input type="text" id="f_salary" placeholder="如：15-20k"></div>
+        <div class="form-group"><label>工作地点</label><input type="text" id="f_location" placeholder="如：北京"></div>
+      </div>
+      <div class="form-group"><label>投递网址</label><input type="url" id="f_applyUrl" placeholder="https://..."></div>
+      <div class="form-group"><label>备注</label><textarea id="f_note" rows="2" placeholder="HR联系方式、面试感受等"></textarea></div>
+      <div class="history-section" id="historySection" style="display:none">
+        <h4>状态历史</h4>
+        <div class="timeline" id="historyTimeline"></div>
+        <button class="add-history-btn" onclick="addHistoryItem()">+ 更新状态</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">取消</button>
+      <button class="btn-primary" onclick="saveRecord()">保存</button>
+    </div>
+  </div>
+</div>
+<div class="filter-dropdown" id="filterDropdown"></div>
+<script>
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { shell } = require('electron');
+
+const DEFAULT_CHANNELS = ['官网','牛客','BOSS直聘','猎聘','前程无忧','智联招聘','内推','其他'];
+const DEFAULT_BATCHES = ['校招','实习','社招','其他'];
+const DEFAULT_STATUSES = ['已投递','简历筛选','测评','笔试','一面','二面','三面/终面','Offer','已拒绝','已挂'];
+const DEFAULT_COLORS = {
+  channel: {'官网':'#dbeafe','牛客':'#d1fae5','BOSS直聘':'#cffafe','猎聘':'#ffedd5','前程无忧':'#ede9fe','智联招聘':'#fce7f3','内推':'#fee2e2','其他':'#f3f4f6'},
+  batch: {'校招':'#e0e7ff','实习':'#ccfbf1','社招':'#fef3c7','其他':'#f1f5f9'},
+  status: {'已投递':'#f3f4f6','简历筛选':'#ede9fe','测评':'#fef3c7','笔试':'#ffedd5','一面':'#dbeafe','二面':'#dbeafe','三面/终面':'#c7d2fe','Offer':'#d1fae5','已拒绝':'#fee2e2','已挂':'#374151'}
+};
+const STATUS_COLORS = {'已投递':'#9ca3af','简历筛选':'#8b5cf6','测评':'#f59e0b','笔试':'#f97316','一面':'#3b82f6','二面':'#2563eb','三面/终面':'#1d4ed8','Offer':'#10b981','已拒绝':'#ef4444','已挂':'#374151'};
+const DEFAULT_COL_WIDTHS = {company:160, position:180, channel:110, batch:80, date:110, status:100, salary:80, location:80, actions:80};
+const BORDER_STYLES = [
+  {id:'none', name:'无边框', desc:'纯净填充'},
+  {id:'capsule', name:'胶囊风', desc:'大圆角+描边'},
+  {id:'soft', name:'柔和圆角', desc:'大圆角无描边'},
+  {id:'card', name:'卡片描边', desc:'小圆角+细边框'},
+  {id:'solid', name:'实心加粗', desc:'大圆角加粗字'}
+];
+
+let records = [];
+let filters = { company: [], channel: [], batch: [], status: [], location: [] };
+let dateSort = 'desc';
+let colWidths = {...DEFAULT_COL_WIDTHS};
+let customOptions = { channel: [], batch: [], status: [] };
+let allOptions = { channel: [], batch: [], status: [] };
+let optionColors = { channel: {}, batch: {}, status: {} };
+const EN_FONTS = [
+  {id:'times', name:'Times New Roman', family:'"Times New Roman"'},
+  {id:'arial', name:'Arial', family:'Arial'},
+  {id:'georgia', name:'Georgia', family:'Georgia'},
+  {id:'verdana', name:'Verdana', family:'Verdana'},
+  {id:'courier', name:'Courier New', family:'"Courier New"'},
+  {id:'tahoma', name:'Tahoma', family:'Tahoma'}
+];
+const CN_FONTS = [
+  {id:'kaiti', name:'楷体_GB2312', family:'"楷体_GB2312", "KaiTi_GB2312", "STKaiti"'},
+  {id:'yahei', name:'微软雅黑', family:'"Microsoft YaHei", "微软雅黑"'},
+  {id:'songti', name:'宋体', family:'"SimSun", "宋体"'},
+  {id:'heiti', name:'黑体', family:'"SimHei", "黑体"'},
+  {id:'fangsong', name:'仿宋_GB2312', family:'"FangSong_GB2312", "仿宋_GB2312", "FangSong"'},
+  {id:'youyuan', name:'幼圆', family:'"YouYuan", "幼圆"'}
+];
+
+let settings = { dataPath: '', borderStyle: 'none', fontSize: 13, fontCn: 'kaiti', fontEn: 'times' };
+let editingId = null;
+let currentFilterCol = null;
+let inlineAddActive = null;
+
+const CONFIG_DIR = path.join(process.env.APPDATA || path.join(os.homedir(), '.config'), 'JobTracker');
+if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
+const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
+let DATA_FILE = path.join(CONFIG_DIR, 'job_data.json');
+
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+}
+function getTextColor(bgHex) {
+  const {r,g,b} = hexToRgb(bgHex);
+  const luminance = (0.299*r + 0.587*g + 0.114*b)/255;
+  return luminance > 0.6 ? '#1f2937' : '#ffffff';
+}
+function getOptColor(type, val) {
+  return optionColors[type] && optionColors[type][val] ? optionColors[type][val] : (DEFAULT_COLORS[type] && DEFAULT_COLORS[type][val] ? DEFAULT_COLORS[type][val] : '#fef3c7');
+}
+function getBadgeStyle(type, val) {
+  const bg = getOptColor(type, val);
+  const color = getTextColor(bg);
+  return `background:${bg};color:${color};`;
+}
+
+function loadConfig() {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const cfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+      settings = {...settings, ...(cfg.settings || {})};
+      customOptions = cfg.customOptions || customOptions;
+      colWidths = {...DEFAULT_COL_WIDTHS, ...(cfg.colWidths || {})};
+      optionColors = cfg.optionColors || optionColors;
+      if (cfg.allOptions) {
+        allOptions = cfg.allOptions;
+      } else {
+        allOptions = {
+          channel: [...DEFAULT_CHANNELS, ...customOptions.channel],
+          batch: [...DEFAULT_BATCHES, ...customOptions.batch],
+          status: [...DEFAULT_STATUSES, ...customOptions.status]
+        };
+      }
+      if (settings.dataPath && fs.existsSync(settings.dataPath)) {
+        DATA_FILE = path.join(settings.dataPath, 'job_data.json');
+      }
+    } else {
+      allOptions = {
+        channel: [...DEFAULT_CHANNELS],
+        batch: [...DEFAULT_BATCHES],
+        status: [...DEFAULT_STATUSES]
+      };
+    }
+  } catch(e) { console.error('加载配置失败:', e); }
+}
+
+function saveConfig() {
+  try {
+    const cfg = { settings, customOptions, allOptions, colWidths, optionColors };
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), 'utf-8');
+  } catch(e) { console.error('保存配置失败:', e); }
+}
+
+function loadAllData() {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+      records = data.records || [];
+      filters = data.filters || { company: [], channel: [], batch: [], status: [], location: [] };
+    }
+  } catch(e) { console.error('加载数据失败:', e); records = []; }
+  records.forEach(r => { if(!r.batch) r.batch='校招'; if(!r.statusHistory||!Array.isArray(r.statusHistory)) r.statusHistory=[{status:r.status||'已投递',date:r.date||today(),note:'历史数据'}]; if(!r.status) r.status=r.statusHistory[r.statusHistory.length-1]?.status||'已投递'; });
+}
+
+function saveAllData() {
+  try {
+    const data = { records, filters };
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    return true;
+  } catch(e) { console.error('保存数据失败:', e); alert('保存失败: ' + e.message); return false; }
+}
+
+function getAllChannels() { return allOptions.channel; }
+function getAllBatches() { return allOptions.batch; }
+function getAllStatuses() { return allOptions.status; }
+function isCustom(type, val) { return !DEFAULT_CHANNELS.concat(DEFAULT_BATCHES).concat(DEFAULT_STATUSES).includes(val); }
+
+function populateSelects() {
+  const ch = document.getElementById('f_channel');
+  const ba = document.getElementById('f_batch');
+  const st = document.getElementById('f_status');
+  ch.innerHTML = getAllChannels().map(o=>`<option>${o}</option>`).join('');
+  ba.innerHTML = getAllBatches().map(o=>`<option>${o}</option>`).join('');
+  st.innerHTML = getAllStatuses().map(o=>`<option>${o}</option>`).join('');
+}
+
+function showInlineAdd(type) {
+  if (inlineAddActive === type) return;
+  inlineAddActive = type;
+  const container = document.getElementById('swa_' + type);
+  const select = container.querySelector('select');
+  const btn = container.querySelector('.add-opt-btn');
+  select.style.display = 'none';
+  btn.style.display = 'none';
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'inline-input';
+  input.placeholder = '输入新' + (type==='channel'?'渠道':type==='batch'?'批次':'状态') + '名，回车确认';
+  input.id = 'inlineAdd_' + type;
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') { confirmInlineAdd(type); }
+    else if (e.key === 'Escape') { cancelInlineAdd(type); }
+  };
+  input.onblur = () => { setTimeout(() => cancelInlineAdd(type), 200); };
+  container.insertBefore(input, btn);
+  input.focus();
+}
+
+function confirmInlineAdd(type) {
+  const input = document.getElementById('inlineAdd_' + type);
+  if (!input) return;
+  const val = input.value.trim();
+  if (val) {
+    const all = type==='channel'?getAllChannels():type==='batch'?getAllBatches():getAllStatuses();
+    if (!all.includes(val)) {
+      allOptions[type].push(val);
+      customOptions[type].push(val);
+      saveConfig();
+      populateSelects();
+      document.getElementById('f_'+type).value = val;
+    }
+  }
+  cancelInlineAdd(type);
+}
+
+function cancelInlineAdd(type) {
+  const input = document.getElementById('inlineAdd_' + type);
+  if (input) input.remove();
+  const container = document.getElementById('swa_' + type);
+  if (container) {
+    container.querySelector('select').style.display = '';
+    container.querySelector('.add-opt-btn').style.display = '';
+  }
+  inlineAddActive = null;
+}
+
+function applyColWidths() {
+  document.querySelectorAll('thead th').forEach(th => {
+    const col = th.dataset.col;
+    if (col && colWidths[col]) th.style.width = colWidths[col] + 'px';
+  });
+}
+
+function applyBorderStyle() {
+  const root = document.getElementById('appRoot');
+  BORDER_STYLES.forEach(bs => root.classList.remove('bs-' + bs.id));
+  root.classList.add('bs-' + (settings.borderStyle || 'none'));
+}
+
+function applyFontSize() {
+  document.documentElement.style.setProperty('--table-font-size', (settings.fontSize || 14) + 'px');
+}
+
+function applyFontFamily() {
+  const en = EN_FONTS.find(f => f.id === (settings.fontEn || 'times'));
+  const cn = CN_FONTS.find(f => f.id === (settings.fontCn || 'kaiti'));
+  const enFamily = en ? en.family : '"Times New Roman"';
+  const cnFamily = cn ? cn.family : '"楷体_GB2312", "KaiTi_GB2312", "STKaiti"';
+  document.documentElement.style.setProperty('--app-font-family', `${enFamily}, ${cnFamily}, serif`);
+}
+
+function setFontCn(id) {
+  settings.fontCn = id;
+  applyFontFamily();
+  saveConfig();
+}
+
+function setFontEn(id) {
+  settings.fontEn = id;
+  applyFontFamily();
+  saveConfig();
+}
+
+function setFontSize(size) {
+  settings.fontSize = parseInt(size);
+  applyFontSize();
+  saveConfig();
+  document.getElementById('fontSizeValue').textContent = settings.fontSize + 'px';
+}
+
+function setupColResize() {
+  let resizing = null, startX = 0, startWidth = 0;
+  document.querySelectorAll('.col-resizer').forEach(resizer => {
+    resizer.addEventListener('mousedown', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const th = resizer.parentElement; const col = th.dataset.col;
+      resizing = col; startX = e.pageX; startWidth = colWidths[col] || th.offsetWidth;
+      resizer.classList.add('active');
+      document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none';
+    });
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!resizing) return;
+    const newWidth = Math.max(50, startWidth + (e.pageX - startX));
+    colWidths[resizing] = newWidth;
+    const th = document.querySelector(`thead th[data-col="${resizing}"]`);
+    if (th) th.style.width = newWidth + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (resizing) {
+      document.querySelectorAll('.col-resizer').forEach(r => r.classList.remove('active'));
+      document.body.style.cursor = ''; document.body.style.userSelect = '';
+      resizing = null; saveConfig();
+    }
+  });
+}
+
+function setupNav() {
+  document.querySelectorAll('.nav button').forEach(btn => { btn.onclick = () => {
+    document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active'); document.getElementById('page-'+btn.dataset.page).classList.add('active');
+    if(btn.dataset.page==='stats') renderStats();
+    if(btn.dataset.page==='settings') renderSettings();
+    window.scrollTo(0, 0);
+  };});
+}
+
+function setupScroll() {
+  window.addEventListener('scroll', () => {
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
+    if (window.scrollY > 60) {
+      hero.classList.add('collapsed');
+    } else {
+      hero.classList.remove('collapsed');
+    }
+  });
+}
+
+function openModal(id) {
+  editingId = id||null;
+  populateSelects();
+  document.getElementById('modalTitle').textContent = id?'编辑投递':'新增投递';
+  document.getElementById('historySection').style.display = id?'block':'none';
+  if(id) { const r=records.find(x=>x.id===id); if(r) {
+    document.getElementById('f_company').value=r.company||''; document.getElementById('f_position').value=r.position||'';
+    document.getElementById('f_channel').value=getAllChannels().includes(r.channel)?r.channel:'其他';
+    document.getElementById('f_batch').value=getAllBatches().includes(r.batch)?r.batch:'校招';
+    document.getElementById('f_date').value=r.date||today();
+    document.getElementById('f_status').value=getAllStatuses().includes(r.status)?r.status:'已投递';
+    document.getElementById('f_salary').value=r.salary||''; document.getElementById('f_location').value=r.location||'';
+    document.getElementById('f_applyUrl').value=r.applyUrl||''; document.getElementById('f_note').value=r.note||'';
+    renderHistory();
+  }} else {
+    ['f_company','f_position','f_salary','f_location','f_applyUrl','f_note'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f_channel').value='官网'; document.getElementById('f_batch').value='校招';
+    document.getElementById('f_date').value=today(); document.getElementById('f_status').value='已投递';
+  }
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal() {
+  ['channel','batch','status'].forEach(cancelInlineAdd);
+  document.getElementById('modalOverlay').classList.remove('active'); editingId=null;
+}
+
+function addCustomOption(type) {
+  const input = document.getElementById('new'+type.charAt(0).toUpperCase()+type.slice(1)+'Opt');
+  const val = input.value.trim();
+  if (!val) return;
+  const all = type==='channel'?getAllChannels():type==='batch'?getAllBatches():getAllStatuses();
+  if (all.includes(val)) { alert('该选项已存在'); return; }
+  allOptions[type].push(val);
+  customOptions[type].push(val);
+  saveConfig();
+  input.value = '';
+  renderSettings();
+  populateSelects();
+}
+
+function removeOption(type, val) {
+  if (!confirm(`确定删除选项"${val}"吗？\n已使用该选项的记录将保留原值，但下拉框不再可选。`)) return;
+  allOptions[type] = allOptions[type].filter(o => o !== val);
+  customOptions[type] = customOptions[type].filter(o => o !== val);
+  if (optionColors[type]) delete optionColors[type][val];
+  saveConfig();
+  renderSettings();
+  populateSelects();
+}
+
+function reorderOption(type, fromIndex, toIndex) {
+  const arr = allOptions[type];
+  if (fromIndex < 0 || fromIndex >= arr.length || toIndex < 0 || toIndex >= arr.length) return;
+  const [item] = arr.splice(fromIndex, 1);
+  arr.splice(toIndex, 0, item);
+  saveConfig();
+  renderSettings();
+  populateSelects();
+}
+
+function setOptionColor(type, val, color) {
+  if (!optionColors[type]) optionColors[type] = {};
+  optionColors[type][val] = color;
+  saveConfig();
+  renderTable();
+  renderSettings();
+}
+
+function renderBorderStyleGrid() {
+  const grid = document.getElementById('borderStyleGrid');
+  grid.innerHTML = BORDER_STYLES.map(bs => {
+    const active = (settings.borderStyle || 'none') === bs.id;
+    let previewStyle = 'background:#dbeafe;color:#1d4ed8;';
+    if (bs.id === 'capsule') previewStyle += 'border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;padding:4px 14px;';
+    if (bs.id === 'soft') previewStyle += 'border:none;border-radius:10px;padding:4px 12px;';
+    if (bs.id === 'card') previewStyle += 'border:1px solid rgba(0,0,0,0.18);border-radius:4px;padding:3px 10px;';
+    if (bs.id === 'solid') previewStyle += 'border:none;border-radius:20px;padding:5px 16px;font-weight:600;background:#2563eb;color:#fff;';
+    return `<div class="border-style-card ${active?'active':''}" onclick="setBorderStyle('${bs.id}')"><span class="bs-preview" style="${previewStyle}">示例</span><div class="bs-name">${bs.name}<br><span style="font-size:10px;color:#9ca3af">${bs.desc}</span></div></div>`;
+  }).join('');
+}
+
+function setBorderStyle(id) {
+  settings.borderStyle = id;
+  saveConfig();
+  applyBorderStyle();
+  renderBorderStyleGrid();
+}
+
+function renderOptColorGrid(type, gridId) {
+  const all = type==='channel'?getAllChannels():type==='batch'?getAllBatches():getAllStatuses();
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = all.map((val, idx) => {
+    const bg = getOptColor(type, val);
+    const custom = isCustom(type, val);
+    return `<div class="opt-color-item drag-item" draggable="true" data-type="${type}" data-index="${idx}" ondragstart="onDragStart(event,'${type}',${idx})" ondragover="onDragOver(event)" ondrop="onDrop(event,'${type}',${idx})" ondragend="onDragEnd(event)" ondragleave="onDragLeave(event)">
+      <span style="cursor:grab;color:#9ca3af;margin-right:4px;font-size:12px" title="拖动排序">⋮⋮</span>
+      <div class="color-preview" style="background:${bg}" onclick="pickColor('${type}','${val.replace(/'/g,"\\'")}')" title="点击修改颜色"></div>
+      <span class="opt-name">${val}${custom?' <span style="color:#f59e0b;font-size:10px">自定义</span>':''}</span>
+      <button class="del-btn" onclick="removeOption('${type}','${val.replace(/'/g,"\\'")}')" title="删除">×</button>
+    </div>`;
+  }).join('');
+}
+
+let dragState = {type:null, fromIndex:null};
+function onDragStart(e, type, index) {
+  dragState = {type, fromIndex:index};
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function onDrop(e, type, toIndex) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (dragState.type === type && dragState.fromIndex !== null && dragState.fromIndex !== toIndex) {
+    reorderOption(type, dragState.fromIndex, toIndex);
+  }
+}
+function onDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  dragState = {type:null, fromIndex:null};
+}
+
+function pickColor(type, val) {
+  const current = getOptColor(type, val);
+  const input = document.createElement('input');
+  input.type = 'color';
+  input.value = current;
+  input.style.position = 'fixed';
+  input.style.opacity = '0';
+  document.body.appendChild(input);
+  input.onchange = () => { setOptionColor(type, val, input.value); document.body.removeChild(input); };
+  input.oncancel = () => { document.body.removeChild(input); };
+  input.click();
+}
+
+function renderSettings() {
+  document.getElementById('currentDataPath').textContent = DATA_FILE;
+  document.getElementById('newDataPath').value = settings.dataPath || '';
+  document.getElementById('fontSizeSlider').value = settings.fontSize || 14;
+  document.getElementById('fontSizeValue').textContent = (settings.fontSize || 14) + 'px';
+  document.getElementById('fontEnSelect').innerHTML = EN_FONTS.map(f => `<option value="${f.id}" ${settings.fontEn===f.id?'selected':''}>${f.name}</option>`).join('');
+  document.getElementById('fontCnSelect').innerHTML = CN_FONTS.map(f => `<option value="${f.id}" ${settings.fontCn===f.id?'selected':''}>${f.name}</option>`).join('');
+  renderBorderStyleGrid();
+  renderOptColorGrid('channel', 'channelColorGrid');
+  renderOptColorGrid('batch', 'batchColorGrid');
+  renderOptColorGrid('status', 'statusColorGrid');
+}
+
+function changeDataPath() {
+  let newPath = document.getElementById('newDataPath').value.trim();
+  if (!newPath) { alert('请输入路径'); return; }
+  try {
+    // 去除两端的引号
+    newPath = newPath.replace(/^['"]|['"]$/g, '');
+    // 如果用户输入的是完整文件路径（包含 .json），自动提取目录
+    if (newPath.toLowerCase().endsWith('.json')) {
+      newPath = path.dirname(newPath);
+    }
+    // 统一路径分隔符
+    newPath = newPath.replace(/\//g, '\\');
+    if (!fs.existsSync(newPath)) fs.mkdirSync(newPath, { recursive: true });
+    const newDataFile = path.join(newPath, 'job_data.json');
+    if (fs.existsSync(DATA_FILE) && DATA_FILE !== newDataFile) {
+      fs.copyFileSync(DATA_FILE, newDataFile);
+    }
+    settings.dataPath = newPath;
+    DATA_FILE = newDataFile;
+    saveConfig();
+    alert('存储位置已修改！\n新路径：' + newDataFile + '\n数据已迁移，重启应用后生效。');
+    renderSettings();
+  } catch(e) { alert('修改失败: ' + e.message); }
+}
+
+function openDataFolder() {
+  try { shell.openPath(path.dirname(DATA_FILE)); } catch(e) { alert('打开失败: ' + e.message); }
+}
+
+function clearAllData() {
+  if (!confirm('确定要清空所有投递记录吗？此操作不可恢复！')) return;
+  if (!confirm('再次确认：真的要删除全部 ' + records.length + ' 条记录吗？')) return;
+  records = [];
+  filters = { company: [], channel: [], batch: [], status: [], location: [] };
+  saveAllData();
+  renderTable();
+  renderStats();
+  alert('数据已清空');
+}
+
+function saveRecord() {
+  try {
+    const company=document.getElementById('f_company').value.trim(), position=document.getElementById('f_position').value.trim();
+    if(!company||!position) { alert('请填写公司名称和岗位名称'); return; }
+    const data={company,position,channel:document.getElementById('f_channel').value,batch:document.getElementById('f_batch').value,date:document.getElementById('f_date').value,status:document.getElementById('f_status').value,salary:document.getElementById('f_salary').value.trim(),location:document.getElementById('f_location').value.trim(),applyUrl:document.getElementById('f_applyUrl').value.trim(),note:document.getElementById('f_note').value.trim()};
+    if(editingId) { const r=records.find(x=>x.id===editingId); if(r){const old=r.status;Object.assign(r,data);if(old!==data.status)r.statusHistory.push({status:data.status,date:today(),note:''});} }
+    else { data.id='rec_'+Date.now()+'_'+Math.random().toString(36).slice(2,7); data.statusHistory=[{status:data.status,date:data.date,note:''}]; records.push(data); }
+    saveAllData(); renderTable(); renderStats(); closeModal();
+  } catch(e) { console.error('保存出错:', e); alert('保存出错: ' + e.message); }
+}
+
+function deleteRecord(id) { if(!confirm('确定删除这条投递记录吗？'))return; records=records.filter(r=>r.id!==id); saveAllData(); renderTable(); renderStats(); }
+
+function renderHistory() {
+  const r=records.find(x=>x.id===editingId); if(!r)return;
+  const sorted=[...r.statusHistory].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  document.getElementById('historyTimeline').innerHTML=sorted.map((h,i)=>`<div class="timeline-item ${i===sorted.length-1?'current':''}"><div class="history-edit"><select onchange="updateHistory(${i},'status',this.value)">${getAllStatuses().map(s=>`<option ${s===h.status?'selected':''}>${s}</option>`).join('')}</select><input type="date" value="${h.date}" onchange="updateHistory(${i},'date',this.value)"><input class="note-input" type="text" value="${(h.note||'').replace(/"/g,'&quot;')}" placeholder="备注" onchange="updateHistory(${i},'note',this.value)"><div class="history-actions"><button class="btn-del-sm" onclick="deleteHistory(${i})">删除</button></div></div></div>`).join('');
+}
+
+function updateHistory(idx,field,value) {
+  const r=records.find(x=>x.id===editingId); if(!r)return;
+  const sorted=[...r.statusHistory].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const oi=r.statusHistory.indexOf(sorted[idx]); if(oi>=0){r.statusHistory[oi][field]=value;const latest=[...r.statusHistory].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];r.status=latest.status;document.getElementById('f_status').value=getAllStatuses().includes(r.status)?r.status:'已投递';saveAllData();}
+}
+
+function deleteHistory(idx) {
+  const r=records.find(x=>x.id===editingId); if(!r)return; if(r.statusHistory.length<=1){alert('至少保留一条状态记录');return;}
+  const sorted=[...r.statusHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)); const oi=r.statusHistory.indexOf(sorted[idx]);
+  if(oi>=0){r.statusHistory.splice(oi,1);const latest=[...r.statusHistory].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];r.status=latest.status;document.getElementById('f_status').value=getAllStatuses().includes(r.status)?r.status:'已投递';saveAllData();renderHistory();}
+}
+
+function addHistoryItem() { const r=records.find(x=>x.id===editingId); if(!r)return; r.statusHistory.push({status:'笔试',date:today(),note:''}); saveAllData(); renderHistory(); }
+
+function getFilteredRecords() {
+  const search=document.getElementById('searchInput').value.toLowerCase().trim();
+  const filtered = records.filter(r=>{
+    if(search){const m=(r.company||'').toLowerCase().includes(search)||(r.position||'').toLowerCase().includes(search)||(r.location||'').toLowerCase().includes(search);if(!m)return false;}
+    if(filters.company.length&&!filters.company.includes(r.company))return false;
+    if(filters.channel.length&&!filters.channel.includes(r.channel))return false;
+    if(filters.batch.length&&!filters.batch.includes(r.batch))return false;
+    if(filters.status.length&&!filters.status.includes(r.status))return false;
+    if(filters.location.length&&!filters.location.includes(r.location||'（未填写）'))return false;
+    return true;
+  });
+  // 按日期排序，日期相同按添加先后（原始索引）排序
+  filtered.sort((a,b)=>{
+    const da = new Date(a.date).getTime();
+    const db = new Date(b.date).getTime();
+    if (da !== db) return dateSort === 'desc' ? db - da : da - db;
+    return records.indexOf(a) - records.indexOf(b);
+  });
+  return filtered;
+}
+
+function toggleDateSort() {
+  dateSort = dateSort === 'desc' ? 'asc' : 'desc';
+  document.getElementById('dateSortIcon').textContent = dateSort === 'desc' ? '↓' : '↑';
+  renderTable();
+}
+
+function renderTable() {
+  const filtered=getFilteredRecords(); const tbody=document.getElementById('recordsBody'); const empty=document.getElementById('emptyState');
+  document.getElementById('recordCount').textContent=`共 ${filtered.length} 条记录`;
+  if(filtered.length===0){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=filtered.map(r=>{
+    const chStyle = getBadgeStyle('channel', r.channel);
+    const baStyle = getBadgeStyle('batch', r.batch);
+    const stStyle = getBadgeStyle('status', r.status);
+    const ch=r.applyUrl?`<span class="badge" style="${chStyle}"><a href="${r.applyUrl}" target="_blank">${r.channel}</a></span>`:`<span class="badge" style="${chStyle}">${r.channel}</span>`;
+    const co=r.applyUrl?`${r.company} <a href="${r.applyUrl}" target="_blank" style="color:#3b82f6;text-decoration:none;margin-left:4px" title="打开投递链接">↗</a>`:r.company;
+    const rowClass = r.status === '已挂' ? 'row-rejected' : '';
+    return `<tr class="${rowClass}"><td title="${r.company}">${co}</td><td title="${r.position}">${r.position}</td><td>${ch}</td><td><span class="badge" style="${baStyle}">${r.batch}</span></td><td>${r.date}</td><td><span class="badge" style="${stStyle}">${r.status}</span></td><td>${r.salary||'-'}</td><td title="${r.location||''}">${r.location||'-'}</td><td><div class="action-btns"><button class="icon-btn" onclick="openModal('${r.id}')" title="编辑">✏️</button><button class="icon-btn delete" onclick="deleteRecord('${r.id}')" title="删除">🗑️</button></div></td></tr>`;
+  }).join('');
+  updateFilterIcons();
+}
+
+function setupFilterDropdown() {
+  document.querySelectorAll('th.filterable').forEach(th=>{
+    th.addEventListener('click', (e) => {
+      if (e.target.classList.contains('col-resizer')) return;
+      e.stopPropagation(); currentFilterCol=th.dataset.col; showFilterDropdown(th);
+    });
+  });
+  document.addEventListener('click',(e)=>{if(!e.target.closest('.filter-dropdown')&&!e.target.closest('th.filterable'))document.getElementById('filterDropdown').classList.remove('show');});
+}
+
+function getFilterOptions(col) {
+  if(col==='channel')return getAllChannels();
+  if(col==='batch')return getAllBatches();
+  if(col==='status')return getAllStatuses();
+  if(col==='company')return[...new Set(records.map(r=>r.company).filter(Boolean))].sort();
+  if(col==='location')return[...new Set(records.map(r=>r.location||'（未填写）'))].sort();
+  return[];
+}
+
+function showFilterDropdown(th) {
+  const dd=document.getElementById('filterDropdown'); const col=currentFilterCol; const options=getFilterOptions(col); const selected=filters[col]||[];
+  const allSel=selected.length===0||selected.length===options.length;
+  dd.innerHTML=`<div class="filter-option"><input type="checkbox" id="fAll" ${allSel?'checked':''} onchange="toggleAllFilters(this.checked)"><label for="fAll" style="cursor:pointer;font-weight:600">全选</label></div>`+options.map(opt=>`<div class="filter-option"><input type="checkbox" id="fo_${opt}" ${selected.includes(opt)?'checked':''} onchange="toggleFilter('${opt.replace(/'/g,"\\'")}',this.checked)"><label for="fo_${opt}" style="cursor:pointer">${opt}</label></div>`).join('');
+  const rect=th.getBoundingClientRect(); dd.style.left=rect.left+'px'; dd.style.top=(rect.bottom+window.scrollY)+'px'; dd.style.minWidth=Math.max(rect.width,140)+'px'; dd.classList.add('show');
+}
+
+function toggleAllFilters(checked) { filters[currentFilterCol]=checked?[]:getFilterOptions(currentFilterCol); saveAllData(); renderTable(); showFilterDropdown(document.querySelector(`th[data-col="${currentFilterCol}"]`)); }
+function toggleFilter(opt,checked) { const arr=filters[currentFilterCol]||[]; if(checked){if(!arr.includes(opt))arr.push(opt);}else{const i=arr.indexOf(opt);if(i>=0)arr.splice(i,1);} filters[currentFilterCol]=arr; saveAllData(); renderTable(); }
+function updateFilterIcons() { document.querySelectorAll('th.filterable').forEach(th=>{const col=th.dataset.col;th.classList.toggle('filtered',filters[col]&&filters[col].length>0);}); }
+
+function renderStats() {
+  const total=records.length, assessment=records.filter(r=>['测评','笔试'].includes(r.status)).length, interview=records.filter(r=>['一面','二面','三面/终面'].includes(r.status)).length, offer=records.filter(r=>r.status==='Offer').length, rate=total>0?((offer/total)*100).toFixed(1):'0.0';
+  document.getElementById('statsGrid').innerHTML=`<div class="stat-card blue"><div class="stat-label">总投递数</div><div class="stat-value">${total}</div></div><div class="stat-card orange"><div class="stat-label">测评/笔试</div><div class="stat-value">${assessment}</div></div><div class="stat-card indigo"><div class="stat-label">面试中</div><div class="stat-value">${interview}</div></div><div class="stat-card green"><div class="stat-label">Offer</div><div class="stat-value">${offer}</div></div><div class="stat-card purple"><div class="stat-label">通过率</div><div class="stat-value">${rate}%</div></div>`;
+  const allStatuses = getAllStatuses();
+  const maxC=Math.max(...allStatuses.map(s=>records.filter(r=>r.status===s).length),1);
+  document.getElementById('statusChart').innerHTML=allStatuses.map(s=>{const c=records.filter(r=>r.status===s).length;const color=STATUS_COLORS[s]||getOptColor('status',s);return`<div class="chart-bar"><div class="chart-bar-label">${s}</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(c/maxC)*100}%;background:${color}"></div></div><div class="chart-bar-value">${c}</div></div>`;}).join('');
+  const days=[]; for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().split('T')[0]);}
+  const maxD=Math.max(...days.map(d=>records.filter(r=>r.date===d).length),1);
+  document.getElementById('trendChart').innerHTML=days.map(d=>{const c=records.filter(r=>r.date===d).length;return`<div class="trend-bar"><div class="trend-bar-fill" style="height:${(c/maxD)*120}px"></div><div class="trend-bar-label">${d.slice(5)}</div><div style="font-size:11px;color:#6b7280">${c}</div></div>`;}).join('');
+}
+
+function exportJSON() { downloadBlob(new Blob([JSON.stringify(records,null,2)],{type:'application/json'}),'投递记录备份_'+today()+'.json'); }
+function exportCSV() {
+  const headers=['公司名称','岗位','渠道','批次','投递日期','当前状态','薪资','地点','投递网址','备注','状态历史'];
+  const rows=records.map(r=>[r.company,r.position,r.channel,r.batch,r.date,r.status,r.salary||'',r.location||'',r.applyUrl||'',(r.note||'').replace(/\n/g,' '),(r.statusHistory||[]).map(h=>`${h.date}:${h.status}${h.note?'('+h.note+')':''}`).join(' → ')]);
+  const csv='\uFEFF'+[headers,...rows].map(row=>row.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadBlob(new Blob([csv],{type:'text/csv'}),'投递记录_'+today()+'.csv');
+}
+function downloadBlob(blob,filename) { const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url;a.download=filename;a.click(); URL.revokeObjectURL(url); }
+function importJSON(e) {
+  const file=e.target.files[0]; if(!file)return; const reader=new FileReader();
+  reader.onload=(ev)=>{try{const data=JSON.parse(ev.target.result);if(Array.isArray(data)){if(confirm(`确定导入 ${data.length} 条记录？这将覆盖当前所有数据。`)){records=data;saveAllData();renderTable();renderStats();alert('导入成功！');}}else alert('文件格式错误');}catch(err){alert('解析失败：'+err.message);}};
+  reader.readAsText(file); e.target.value='';
+}
+document.getElementById('modalOverlay').onclick=(e)=>{if(e.target.id==='modalOverlay')closeModal();};
+
+try {
+  loadConfig();
+  loadAllData();
+  applyBorderStyle();
+  applyFontSize();
+  applyFontFamily();
+  applyColWidths();
+  setupNav();
+  setupFilterDropdown();
+  setupColResize();
+  setupScroll();
+  document.getElementById('f_date').value = today();
+  renderTable();
+  renderStats();
+} catch(e) {
+  console.error('初始化失败:', e);
+  document.body.innerHTML = '<div style="padding:40px;font-family:sans-serif"><h2>应用初始化失败</h2><p>' + e.message + '</p><pre>' + e.stack + '</pre></div>';
+}
+</script>
+</body>
+</html>
