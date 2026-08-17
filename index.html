@@ -5,187 +5,285 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>秋招投递管理助手</title>
 <style>
+:root {
+  --bg: #f0f4f8; --card-bg: #fff; --text: #1f2937; --text2: #6b7280; --text3: #9ca3af;
+  --border: #e5e7eb; --border2: #f3f4f6; --header-bg: #fff; --input-bg: #fff; --input-border: #d1d5db;
+  --hover: #f3f4f6; --th-bg: #f8fafc; --modal-bg: #fff; --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --primary: #2563eb; --primary-light: #eff6ff;
+}
+.dark-mode {
+  --bg: #0f172a; --card-bg: #1e293b; --text: #f1f5f9; --text2: #94a3b8; --text3: #64748b;
+  --border: #334155; --border2: #1e293b; --header-bg: #1e293b; --input-bg: #334155; --input-border: #475569;
+  --hover: #334155; --th-bg: #1e293b; --modal-bg: #1e293b; --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --primary: #3b82f6; --primary-light: #1e3a5f;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: var(--app-font-family, "Times New Roman", "楷体_GB2312", "KaiTi_GB2312", "STKaiti", serif); background: #f0f4f8; color: #1f2937; font-size: 14px; }
+body { font-family: var(--app-font-family, "Times New Roman", "楷体_GB2312", "KaiTi_GB2312", "STKaiti", serif); background: var(--bg); color: var(--text); font-size: 14px; transition: background 0.3s, color 0.3s; }
 .app { min-height: 100vh; }
-.header { background: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
+.header { background: var(--header-bg); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; transition: background 0.3s; }
 .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; color: #1e40af; }
 .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
 .nav { display: flex; gap: 8px; }
-.nav button { padding: 8px 16px; border: none; background: transparent; cursor: pointer; font-size: 14px; color: #6b7280; border-radius: 6px; transition: all 0.2s; }
-.nav button:hover { background: #f3f4f6; }
-.nav button.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
-.btn-primary { background: #2563eb; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+.nav button { padding: 8px 16px; border: none; background: transparent; cursor: pointer; font-size: 14px; color: var(--text2); border-radius: 6px; transition: all 0.2s; }
+.nav button:hover { background: var(--hover); }
+.nav button.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+.btn-primary { background: var(--primary); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
 .btn-primary:hover { background: #1d4ed8; }
-.btn-secondary { background: #fff; color: #374151; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
-.btn-secondary:hover { background: #f9fafb; }
+.btn-secondary { background: var(--card-bg); color: var(--text); border: 1px solid var(--input-border); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.btn-secondary:hover { background: var(--hover); }
 .btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
 .btn-danger:hover { background: #fecaca; }
 .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
 .page { display: none; }
 .page.active { display: block; }
-.hero { background: linear-gradient(135deg, #eff6ff, #dbeafe); padding: 32px; border-radius: 12px; margin-bottom: 24px; transition: all 0.3s ease; overflow: hidden; }
+.hero { background: linear-gradient(135deg, #eff6ff, #dbeafe); padding: 32px; border-radius: 12px; margin-bottom: 16px; transition: all 0.3s ease; overflow: hidden; }
+.dark-mode .hero { background: linear-gradient(135deg, #1e3a5f, #1e40af); }
 .hero h1 { font-size: 28px; color: #1e3a8a; margin-bottom: 8px; transition: all 0.3s ease; }
+.dark-mode .hero h1 { color: #dbeafe; }
 .hero p { color: #64748b; font-size: 15px; transition: all 0.3s ease; }
-.hero.collapsed { padding: 12px 32px; margin-bottom: 16px; }
+.hero.collapsed { padding: 12px 32px; margin-bottom: 12px; }
 .hero.collapsed h1 { font-size: 18px; margin-bottom: 0; }
 .hero.collapsed p { display: none; }
+/* 待办事项栏 */
+.upcoming-bar { background: var(--card-bg); border-radius: 10px; box-shadow: var(--shadow); padding: 12px 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; transition: background 0.3s; }
+.upcoming-bar .upcoming-title { font-weight: 600; color: var(--text); font-size: 13px; flex-shrink: 0; }
+.upcoming-bar .upcoming-list { display: flex; gap: 10px; flex-wrap: wrap; flex: 1; }
+.upcoming-item { background: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+.upcoming-item:hover { background: #fde68a; }
+.upcoming-item.urgent { background: #fee2e2; color: #b91c1c; }
+.upcoming-item.today { background: #dbeafe; color: #1d4ed8; }
+.upcoming-empty { color: var(--text3); font-size: 13px; }
 tr.row-rejected { background: #e5e7eb !important; }
+.dark-mode tr.row-rejected { background: #1e293b !important; }
 tr.row-rejected:hover { background: #d1d5db !important; }
 tr.row-rejected td { color: #6b7280; }
+tr.row-selected { background: #eff6ff !important; }
+.dark-mode tr.row-selected { background: #1e3a5f !important; }
 .drag-item { cursor: grab; user-select: none; }
 .drag-item:active { cursor: grabbing; }
 .drag-item.dragging { opacity: 0.4; }
 .drag-item.drag-over { border-top: 2px solid #3b82f6; }
 .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
-.stat-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.stat-label { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
-.stat-value { font-size: 28px; font-weight: 700; color: #1f2937; }
+.stat-card { background: var(--card-bg); padding: 20px; border-radius: 10px; box-shadow: var(--shadow); transition: background 0.3s; }
+.stat-label { font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text); }
 .stat-card.blue .stat-value { color: #2563eb; }
 .stat-card.orange .stat-value { color: #f59e0b; }
 .stat-card.indigo .stat-value { color: #4f46e5; }
 .stat-card.green .stat-value { color: #10b981; }
 .stat-card.purple .stat-value { color: #8b5cf6; }
 .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-.chart-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.chart-card h3 { font-size: 16px; margin-bottom: 16px; color: #374151; }
+.chart-card { background: var(--card-bg); padding: 20px; border-radius: 10px; box-shadow: var(--shadow); transition: background 0.3s; }
+.chart-card h3 { font-size: 16px; margin-bottom: 16px; color: var(--text); }
 .chart-bar { display: flex; align-items: center; margin-bottom: 8px; gap: 10px; }
-.chart-bar-label { width: 80px; font-size: 12px; color: #6b7280; text-align: right; flex-shrink: 0; }
-.chart-bar-track { flex: 1; height: 20px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
+.chart-bar-label { width: 80px; font-size: 12px; color: var(--text2); text-align: right; flex-shrink: 0; }
+.chart-bar-track { flex: 1; height: 20px; background: var(--hover); border-radius: 4px; overflow: hidden; }
 .chart-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
-.chart-bar-value { width: 30px; font-size: 12px; color: #374151; font-weight: 600; }
-.table-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
-.table-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f3f4f6; }
-.table-header h2 { font-size: 18px; color: #1f2937; }
-.toolbar { padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f3f4f6; }
+.chart-bar-value { width: 30px; font-size: 12px; color: var(--text); font-weight: 600; }
+.table-card { background: var(--card-bg); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; transition: background 0.3s; }
+.table-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border2); }
+.table-header h2 { font-size: 18px; color: var(--text); }
+.toolbar { padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border2); flex-wrap: wrap; }
 .search-box { flex: 1; max-width: 320px; position: relative; }
-.search-box input { width: 100%; padding: 8px 12px 8px 36px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; outline: none; }
+.search-box input { width: 100%; padding: 8px 12px 8px 36px; border: 1px solid var(--input-border); border-radius: 6px; font-size: 13px; outline: none; background: var(--input-bg); color: var(--text); }
 .search-box input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
-.record-count { color: #6b7280; font-size: 13px; margin-left: auto; }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); }
+.record-count { color: var(--text2); font-size: 13px; margin-left: auto; }
+.batch-bar { padding: 10px 20px; background: var(--primary-light); border-bottom: 1px solid var(--border); display: none; align-items: center; gap: 12px; }
+.batch-bar.show { display: flex; }
+.batch-bar .batch-info { color: var(--primary); font-weight: 600; font-size: 13px; }
+.batch-bar select { padding: 6px 10px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; background: var(--input-bg); color: var(--text); }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-thead th { background: #f8fafc; padding: 12px 10px; text-align: left; font-size: 14px; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; position: relative; user-select: none; }
+thead th { background: var(--th-bg); padding: 12px 10px; text-align: left; font-size: 14px; font-weight: 600; color: var(--text); border-bottom: 2px solid var(--border); position: relative; user-select: none; transition: background 0.3s; }
 th.filterable { cursor: pointer; }
-th.filterable:hover { background: #f1f5f9; }
+th.filterable:hover { background: var(--hover); }
 th.sortable { cursor: pointer; user-select: none; }
-th.sortable:hover { background: #f1f5f9; }
-.sort-icon { margin-left: 4px; font-size: 12px; color: #2563eb; font-weight: bold; }
-.filter-icon { margin-left: 4px; font-size: 12px; color: #9ca3af; }
-th.filtered .filter-icon { color: #2563eb; }
+th.sortable:hover { background: var(--hover); }
+.sort-icon { margin-left: 4px; font-size: 12px; color: var(--primary); font-weight: bold; }
+.filter-icon { margin-left: 4px; font-size: 12px; color: var(--text3); }
+th.filtered .filter-icon { color: var(--primary); }
 .col-resizer { position: absolute; right: 0; top: 0; width: 6px; height: 100%; cursor: col-resize; user-select: none; z-index: 10; }
 .col-resizer:hover, .col-resizer.active { background: #3b82f6; opacity: 0.5; }
-tbody td { padding: 12px 10px; border-bottom: 1px solid #f3f4f6; font-size: var(--table-font-size, 13px); color: #374151; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-tbody tr:hover { background: #f8fafc; }
+tbody td { padding: 12px 10px; border-bottom: 1px solid var(--border2); font-size: var(--table-font-size, 13px); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.3s; }
+tbody tr:hover { background: var(--hover); }
 .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.9em; font-weight: 500; white-space: nowrap; }
 .badge a { color: inherit; text-decoration: none; }
 .badge a:hover { text-decoration: underline; }
-/* 默认颜色 */
-.s-已投递 { background: #f3f4f6; color: #6b7280; }
-.s-简历筛选 { background: #ede9fe; color: #7c3aed; }
-.s-测评 { background: #fef3c7; color: #b45309; }
-.s-笔试 { background: #ffedd5; color: #c2410c; }
-.s-一面 { background: #dbeafe; color: #1d4ed8; }
-.s-二面 { background: #dbeafe; color: #1e40af; }
-.s-三面\/终面 { background: #c7d2fe; color: #3730a3; }
-.s-Offer { background: #d1fae5; color: #047857; }
-.s-已拒绝 { background: #fee2e2; color: #b91c1c; }
-.s-已挂 { background: #374151; color: #f3f4f6; }
-.c-官网 { background: #dbeafe; color: #1d4ed8; }
-.c-牛客 { background: #d1fae5; color: #047857; }
-.c-BOSS直聘 { background: #cffafe; color: #0e7490; }
-.c-猎聘 { background: #ffedd5; color: #c2410c; }
-.c-前程无忧 { background: #ede9fe; color: #6d28d9; }
-.c-智联招聘 { background: #fce7f3; color: #be185d; }
-.c-内推 { background: #fee2e2; color: #b91c1c; }
-.c-其他 { background: #f3f4f6; color: #6b7280; }
-.b-校招 { background: #e0e7ff; color: #4338ca; }
-.b-实习 { background: #ccfbf1; color: #0f766e; }
-.b-社招 { background: #fef3c7; color: #b45309; }
-.b-其他 { background: #f1f5f9; color: #475569; }
-.custom-badge { background: #fef3c7; color: #92400e; }
+/* 进度条 */
+.progress-cell { min-width: 100px; }
+.progress-bar-wrap { width: 100%; height: 6px; background: var(--hover); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.progress-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+/* 复选框 */
+.row-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary); }
+.action-btns { display: flex; gap: 8px; }
+.icon-btn { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 16px; color: var(--text2); transition: all 0.2s; }
+.icon-btn:hover { background: var(--hover); color: var(--primary); }
+.icon-btn.delete:hover { color: #ef4444; }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
+.empty-state .plus-icon { width: 60px; height: 60px; background: var(--hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px; }
+.empty-state h3 { font-size: 18px; color: var(--text); margin-bottom: 8px; }
+.empty-state p { margin-bottom: 20px; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: var(--modal-bg); border-radius: 12px; width: 90%; max-width: 640px; max-height: 90vh; overflow-y: auto; transition: background 0.3s; }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; }
+.modal-header h3 { font-size: 18px; color: var(--text); }
+.modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text3); line-height: 1; }
+.modal-body { padding: 24px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 6px; font-size: 14px; outline: none; font-family: inherit; background: var(--input-bg); color: var(--text); }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.select-with-add { display: flex; gap: 6px; align-items: center; }
+.select-with-add select { flex: 1; }
+.add-opt-btn { width: 32px; height: 32px; flex-shrink: 0; border: 1px solid var(--input-border); background: var(--card-bg); border-radius: 6px; cursor: pointer; font-size: 16px; color: var(--text2); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.add-opt-btn:hover { background: var(--primary-light); border-color: #3b82f6; color: var(--primary); }
+.inline-input { width: 100%; padding: 6px 10px; border: 1px solid #3b82f6; border-radius: 6px; font-size: 13px; outline: none; background: var(--input-bg); color: var(--text); }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border2); display: flex; justify-content: flex-end; gap: 10px; }
+.history-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border2); }
+.history-section h4 { font-size: 15px; margin-bottom: 12px; color: var(--text); }
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before { content: ''; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+.timeline-item { position: relative; margin-bottom: 16px; }
+.timeline-item::before { content: ''; position: absolute; left: -21px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; border: 2px solid var(--modal-bg); box-shadow: 0 0 0 2px #3b82f6; }
+.timeline-item.current::before { background: #10b981; box-shadow: 0 0 0 2px #10b981; }
+.history-edit { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--hover); padding: 10px; border-radius: 6px; }
+.history-edit select, .history-edit input { padding: 5px 8px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; background: var(--input-bg); color: var(--text); }
+.history-edit .note-input { flex: 1; min-width: 120px; }
+.history-actions { display: flex; gap: 4px; }
+.history-actions button { padding: 4px 8px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; }
+.btn-del-sm { background: #fee2e2; color: #b91c1c; }
+.add-history-btn { margin-top: 8px; padding: 6px 12px; background: var(--hover); border: 1px dashed var(--input-border); border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text2); width: 100%; }
+.add-history-btn:hover { background: var(--border); color: var(--text); }
+/* 面试记录 */
+.interview-item { background: var(--hover); padding: 12px; border-radius: 6px; margin-bottom: 10px; }
+.interview-item .iv-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.interview-item .iv-row input, .interview-item .iv-row select { padding: 5px 8px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; background: var(--input-bg); color: var(--text); }
+.interview-item textarea { width: 100%; padding: 6px 8px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; resize: vertical; background: var(--input-bg); color: var(--text); font-family: inherit; }
+.interview-item .iv-actions { display: flex; justify-content: flex-end; margin-top: 6px; }
+/* 下次事项 */
+.next-event-section { background: #fef3c7; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+.dark-mode .next-event-section { background: #422006; }
+.next-event-section h4 { font-size: 14px; color: #92400e; margin-bottom: 8px; }
+.dark-mode .next-event-section h4 { color: #fde68a; }
+.next-event-section .ne-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.next-event-section input { padding: 6px 10px; border: 1px solid #fcd34d; border-radius: 4px; font-size: 12px; background: #fffbeb; color: #92400e; }
+.dark-mode .next-event-section input { background: #78350f; color: #fde68a; border-color: #92400e; }
+.filter-dropdown { position: fixed; background: var(--modal-bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; min-width: 160px; padding: 8px 0; display: none; max-height: 300px; overflow-y: auto; }
+.filter-dropdown.show { display: block; }
+.filter-option { padding: 6px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--text); }
+.filter-option:hover { background: var(--hover); }
+.io-card { background: var(--card-bg); padding: 24px; border-radius: 10px; box-shadow: var(--shadow); margin-bottom: 16px; transition: background 0.3s; }
+.io-card h3 { font-size: 16px; margin-bottom: 12px; color: var(--text); }
+.io-card p { color: var(--text2); font-size: 13px; margin-bottom: 16px; }
+.io-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+.trend-chart { display: flex; align-items: flex-end; gap: 8px; height: 150px; padding: 10px 0; }
+.trend-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.trend-bar-fill { width: 100%; background: #3b82f6; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s; }
+.trend-bar-label { font-size: 11px; color: var(--text3); }
+.settings-section { margin-bottom: 28px; }
+.settings-section h3 { font-size: 16px; color: var(--text); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.setting-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.setting-row .setting-label { width: 120px; flex-shrink: 0; font-size: 13px; color: var(--text2); padding-top: 8px; }
+.setting-row .setting-control { flex: 1; }
+.setting-row .setting-control input[type=text] { width: 100%; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 6px; font-size: 13px; background: var(--input-bg); color: var(--text); }
+.setting-hint { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.opt-color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; }
+.opt-color-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--hover); border-radius: 6px; }
+.opt-color-item .color-preview { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--border); flex-shrink: 0; cursor: pointer; }
+.opt-color-item .opt-name { font-size: 12px; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opt-color-item .del-btn { background: none; border: none; cursor: pointer; color: #ef4444; font-size: 14px; padding: 0 2px; opacity: 0.5; }
+.opt-color-item .del-btn:hover { opacity: 1; }
+.border-style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
+.border-style-card { padding: 12px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s; background: var(--card-bg); }
+.border-style-card:hover { border-color: #93c5fd; }
+.border-style-card.active { border-color: var(--primary); background: var(--primary-light); }
+.border-style-card .bs-preview { display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 12px; margin-bottom: 6px; background: #dbeafe; color: #1d4ed8; }
+.border-style-card .bs-name { font-size: 12px; color: var(--text2); }
+.path-display { background: var(--hover); padding: 10px 12px; border-radius: 6px; font-family: monospace; font-size: 12px; color: var(--text); word-break: break-all; margin-bottom: 8px; }
+.add-opt-row { display: flex; gap: 6px; margin-bottom: 10px; }
+.add-opt-row input { flex: 1; padding: 6px 10px; border: 1px solid var(--input-border); border-radius: 6px; font-size: 13px; background: var(--input-bg); color: var(--text); }
 /* 边框样式 */
 .bs-none .badge { border: none; }
 .bs-capsule .badge { border: 1.5px solid rgba(0,0,0,0.15); border-radius: 20px; padding: 4px 14px; }
 .bs-soft .badge { border: none; border-radius: 10px; padding: 4px 12px; }
 .bs-card .badge { border: 1px solid rgba(0,0,0,0.18); border-radius: 4px; padding: 3px 10px; }
 .bs-solid .badge { border: none; border-radius: 20px; padding: 5px 16px; font-weight: 600; }
-.action-btns { display: flex; gap: 8px; }
-.icon-btn { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 16px; color: #6b7280; transition: all 0.2s; }
-.icon-btn:hover { background: #f3f4f6; color: #2563eb; }
-.icon-btn.delete:hover { color: #ef4444; }
-.empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
-.empty-state .plus-icon { width: 60px; height: 60px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px; }
-.empty-state h3 { font-size: 18px; color: #374151; margin-bottom: 8px; }
-.empty-state p { margin-bottom: 20px; }
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-.modal-overlay.active { display: flex; }
-.modal { background: #fff; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
-.modal-header { padding: 20px 24px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
-.modal-header h3 { font-size: 18px; color: #1f2937; }
-.modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #9ca3af; line-height: 1; }
-.modal-body { padding: 24px; }
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; font-family: inherit; }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.select-with-add { display: flex; gap: 6px; align-items: center; }
-.select-with-add select { flex: 1; }
-.add-opt-btn { width: 32px; height: 32px; flex-shrink: 0; border: 1px solid #d1d5db; background: #fff; border-radius: 6px; cursor: pointer; font-size: 16px; color: #6b7280; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-.add-opt-btn:hover { background: #eff6ff; border-color: #3b82f6; color: #2563eb; }
-.inline-input { width: 100%; padding: 6px 10px; border: 1px solid #3b82f6; border-radius: 6px; font-size: 13px; outline: none; }
-.modal-footer { padding: 16px 24px; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; gap: 10px; }
-.history-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #f3f4f6; }
-.history-section h4 { font-size: 15px; margin-bottom: 12px; color: #374151; }
-.timeline { position: relative; padding-left: 24px; }
-.timeline::before { content: ''; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: #e5e7eb; }
-.timeline-item { position: relative; margin-bottom: 16px; }
-.timeline-item::before { content: ''; position: absolute; left: -21px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; border: 2px solid #fff; box-shadow: 0 0 0 2px #3b82f6; }
-.timeline-item.current::before { background: #10b981; box-shadow: 0 0 0 2px #10b981; }
-.history-edit { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #f9fafb; padding: 10px; border-radius: 6px; }
-.history-edit select, .history-edit input { padding: 5px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; }
-.history-edit .note-input { flex: 1; min-width: 120px; }
-.history-actions { display: flex; gap: 4px; }
-.history-actions button { padding: 4px 8px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; }
-.btn-del-sm { background: #fee2e2; color: #b91c1c; }
-.add-history-btn { margin-top: 8px; padding: 6px 12px; background: #f3f4f6; border: 1px dashed #d1d5db; border-radius: 6px; cursor: pointer; font-size: 13px; color: #6b7280; width: 100%; }
-.add-history-btn:hover { background: #e5e7eb; color: #374151; }
-.filter-dropdown { position: fixed; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; min-width: 160px; padding: 8px 0; display: none; max-height: 300px; overflow-y: auto; }
-.filter-dropdown.show { display: block; }
-.filter-option { padding: 6px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
-.filter-option:hover { background: #f3f4f6; }
-.io-card { background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; }
-.io-card h3 { font-size: 16px; margin-bottom: 12px; color: #374151; }
-.io-card p { color: #6b7280; font-size: 13px; margin-bottom: 16px; }
-.io-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-.trend-chart { display: flex; align-items: flex-end; gap: 8px; height: 150px; padding: 10px 0; }
-.trend-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.trend-bar-fill { width: 100%; background: #3b82f6; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s; }
-.trend-bar-label { font-size: 11px; color: #9ca3af; }
-.settings-section { margin-bottom: 28px; }
-.settings-section h3 { font-size: 16px; color: #1f2937; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; }
-.setting-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
-.setting-row .setting-label { width: 120px; flex-shrink: 0; font-size: 13px; color: #6b7280; padding-top: 8px; }
-.setting-row .setting-control { flex: 1; }
-.setting-row .setting-control input[type=text] { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
-.setting-hint { font-size: 12px; color: #9ca3af; margin-top: 4px; }
-.opt-color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; }
-.opt-color-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #f9fafb; border-radius: 6px; }
-.opt-color-item .color-preview { width: 24px; height: 24px; border-radius: 4px; border: 1px solid #e5e7eb; flex-shrink: 0; cursor: pointer; }
-.opt-color-item .opt-name { font-size: 12px; color: #374151; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.opt-color-item .del-btn { background: none; border: none; cursor: pointer; color: #ef4444; font-size: 14px; padding: 0 2px; opacity: 0.5; }
-.opt-color-item .del-btn:hover { opacity: 1; }
-.opt-color-item .del-btn.hidden { visibility: hidden; }
-.border-style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
-.border-style-card { padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s; background: #fff; }
-.border-style-card:hover { border-color: #93c5fd; }
-.border-style-card.active { border-color: #2563eb; background: #eff6ff; }
-.border-style-card .bs-preview { display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 12px; margin-bottom: 6px; background: #dbeafe; color: #1d4ed8; }
-.border-style-card .bs-name { font-size: 12px; color: #6b7280; }
-.path-display { background: #f9fafb; padding: 10px 12px; border-radius: 6px; font-family: monospace; font-size: 12px; color: #374151; word-break: break-all; margin-bottom: 8px; }
-.add-opt-row { display: flex; gap: 6px; margin-bottom: 10px; }
-.add-opt-row input { flex: 1; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+/* 深色模式开关 */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 24px; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--primary); }
+input:checked + .slider:before { transform: translateX(20px); }
+/* AI 侧边栏 */
+.ai-toggle-btn { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; margin-left: 8px; transition: all 0.2s; }
+.ai-toggle-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(139,92,246,0.4); }
+.ai-sidebar { position: fixed; top: 0; right: -420px; width: 420px; height: 100vh; background: var(--card-bg); box-shadow: -4px 0 20px rgba(0,0,0,0.15); z-index: 150; transition: right 0.3s ease; display: flex; flex-direction: column; }
+.ai-sidebar.open { right: 0; }
+.ai-sidebar-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; }
+.ai-sidebar-header h3 { font-size: 16px; display: flex; align-items: center; gap: 8px; }
+.ai-sidebar-close { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; opacity: 0.8; }
+.ai-sidebar-close:hover { opacity: 1; }
+.ai-context { padding: 10px 20px; background: var(--hover); border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 8px; }
+.ai-context .ctx-tag { background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+.ai-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--card-bg); }
+.ai-tab { flex: 1; padding: 10px 4px; text-align: center; cursor: pointer; font-size: 12px; color: var(--text2); border-bottom: 2px solid transparent; transition: all 0.2s; }
+.ai-tab:hover { background: var(--hover); }
+.ai-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.ai-chat-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.ai-msg { max-width: 90%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+.ai-msg.user { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
+.ai-msg.assistant { align-self: flex-start; background: var(--hover); color: var(--text); border-bottom-left-radius: 4px; }
+.ai-msg.loading { display: flex; gap: 4px; padding: 12px 14px; }
+.ai-msg.loading span { width: 6px; height: 6px; background: var(--text3); border-radius: 50%; animation: bounce 1.4s infinite; }
+.ai-msg.loading span:nth-child(2) { animation-delay: 0.2s; }
+.ai-msg.loading span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0);} 30%{transform:translateY(-6px);} }
+.ai-input-area { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+.ai-input-area textarea { flex: 1; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 8px; font-size: 13px; resize: none; outline: none; font-family: inherit; background: var(--input-bg); color: var(--text); min-height: 40px; max-height: 120px; }
+.ai-input-area textarea:focus { border-color: var(--primary); }
+.ai-send-btn { background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; align-self: flex-end; }
+.ai-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ai-quick-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.ai-quick-btn { background: var(--hover); border: 1px solid var(--border); color: var(--text2); padding: 4px 10px; border-radius: 12px; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+.ai-quick-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+.ai-config-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.ai-config-row select, .ai-config-row input { flex: 1; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 6px; font-size: 13px; background: var(--input-bg); color: var(--text); outline: none; }
+.ai-config-row input[type=password] { font-family: monospace; }
+.ai-test-btn { background: #10b981; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.ai-test-btn:hover { background: #059669; }
+.ai-status { font-size: 12px; margin-top: 6px; padding: 6px 10px; border-radius: 4px; }
+.ai-status.ok { background: #d1fae5; color: #065f46; }
+.ai-status.err { background: #fee2e2; color: #991b1b; }
+.ai-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 140; }
+.ai-overlay.show { display: block; }
+/* 简历档案 */
+.resume-section { background: var(--hover); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+.resume-section h4 { font-size: 13px; margin-bottom: 8px; color: var(--primary); }
+.resume-section textarea { width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 6px; font-size: 13px; resize: vertical; outline: none; font-family: inherit; background: var(--input-bg); color: var(--text); min-height: 60px; }
+.resume-section textarea:focus { border-color: var(--primary); }
+.resume-section input { width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 6px; font-size: 13px; outline: none; background: var(--input-bg); color: var(--text); }
+.interview-control { display: flex; gap: 8px; margin-bottom: 10px; }
+.interview-control button { flex: 1; padding: 8px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+.btn-start-interview { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; }
+.btn-end-interview { background: #ef4444; color: #fff; }
+.voice-btn { background: var(--hover); border: 1px solid var(--border); color: var(--text2); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px; }
+.voice-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+.voice-btn.active { background: #ef4444; color: #fff; border-color: #ef4444; }
+.voice-btn.recording { background: #ef4444; color: #fff; border-color: #ef4444; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.6;} }
+/* 列右键菜单 */
+.col-menu { position: fixed; background: var(--modal-bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 200; padding: 8px 0; display: none; min-width: 160px; }
+.col-menu.show { display: block; }
+.col-menu-item { padding: 8px 16px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; color: var(--text); }
+.col-menu-item:hover { background: var(--hover); }
+.col-menu-item input { cursor: pointer; }
+.col-menu-title { padding: 6px 16px; font-size: 12px; color: var(--text3); font-weight: 600; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+th { -webkit-user-select: none; user-select: none; }
 </style>
 </head>
 <body>
@@ -198,7 +296,10 @@ tbody tr:hover { background: #f8fafc; }
       <button data-page="io">📁 导入导出</button>
       <button data-page="settings">⚙️ 设置</button>
     </div>
-    <button class="btn-primary" onclick="openModal()">+ 新增投递</button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="ai-toggle-btn" onclick="toggleAISidebar()">🤖 AI 助手</button>
+      <button class="btn-primary" onclick="openModal()">+ 新增投递</button>
+    </div>
   </div>
   <div class="container">
     <div class="page active" id="page-records">
@@ -206,10 +307,24 @@ tbody tr:hover { background: #f8fafc; }
         <h1>秋招投递管理</h1>
         <p>一站式管理你的求职投递记录，追踪进度，洞察通过率</p>
       </div>
+      <div class="upcoming-bar" id="upcomingBar">
+        <span class="upcoming-title">⏰ 近期待办：</span>
+        <div class="upcoming-list" id="upcomingList"></div>
+      </div>
       <div class="table-card">
         <div class="table-header">
           <h2>投递记录</h2>
           <button class="btn-primary" onclick="openModal()">+ 新增投递</button>
+        </div>
+        <div class="batch-bar" id="batchBar">
+          <span class="batch-info" id="batchInfo">已选 0 条</span>
+          <select id="batchStatusSelect">
+            <option value="">批量改状态...</option>
+          </select>
+          <button class="btn-secondary" onclick="batchSetStatus()">应用</button>
+          <button class="btn-danger" onclick="batchDelete()">批量删除</button>
+          <button class="btn-secondary" onclick="clearSelection()">取消选择</button>
+          <button class="btn-secondary" onclick="openRecycleBin()" style="margin-left:auto">🗑️ 回收站</button>
         </div>
         <div class="toolbar">
           <div class="search-box">
@@ -222,15 +337,17 @@ tbody tr:hover { background: #f8fafc; }
           <table id="recordsTable">
             <thead>
               <tr>
-                <th class="filterable" data-col="company" data-width="160">公司名称<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
-                <th data-col="position" data-width="180">岗位<div class="col-resizer"></div></th>
-                <th class="filterable" data-col="channel" data-width="110">渠道<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
-                <th class="filterable" data-col="batch" data-width="80">批次<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
-                <th class="sortable" data-col="date" data-width="110" onclick="toggleDateSort()">投递日期<span class="sort-icon" id="dateSortIcon">↓</span><div class="col-resizer"></div></th>
-                <th class="filterable" data-col="status" data-width="100">状态<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
-                <th data-col="salary" data-width="80">薪资<div class="col-resizer"></div></th>
-                <th class="filterable" data-col="location" data-width="80">地点<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
-                <th data-col="actions" data-width="80">操作<div class="col-resizer"></div></th>
+                <th data-col="select" data-width="40"><input type="checkbox" class="row-checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                <th class="filterable" data-col="company" data-width="140">公司名称<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th data-col="position" data-width="150">岗位<div class="col-resizer"></div></th>
+                <th class="filterable" data-col="industry" data-width="90">行业<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th class="filterable" data-col="channel" data-width="90">渠道<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th class="filterable" data-col="batch" data-width="70">批次<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th class="sortable" data-col="date" data-width="100" onclick="toggleDateSort()">投递日期<span class="sort-icon" id="dateSortIcon">↓</span><div class="col-resizer"></div></th>
+                <th class="filterable" data-col="status" data-width="120">状态/进度<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th data-col="salary" data-width="70">薪资<div class="col-resizer"></div></th>
+                <th class="filterable" data-col="location" data-width="70">地点<span class="filter-icon">▽</span><div class="col-resizer"></div></th>
+                <th data-col="actions" data-width="70">操作<div class="col-resizer"></div></th>
               </tr>
             </thead>
             <tbody id="recordsBody"></tbody>
@@ -253,6 +370,10 @@ tbody tr:hover { background: #f8fafc; }
       <div class="charts-row">
         <div class="chart-card"><h3>状态分布</h3><div id="statusChart"></div></div>
         <div class="chart-card"><h3>近7天投递趋势</h3><div class="trend-chart" id="trendChart"></div></div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card"><h3>行业分布</h3><div id="industryChart"></div></div>
+        <div class="chart-card"><h3>岗位分布 TOP10</h3><div id="positionChart"></div></div>
       </div>
     </div>
     <div class="page" id="page-io">
@@ -290,11 +411,156 @@ tbody tr:hover { background: #f8fafc; }
             <div class="setting-control">
               <div class="path-display" id="currentDataPath"></div>
               <div style="display:flex;gap:8px">
-                <input type="text" id="newDataPath" placeholder="只填文件夹路径，如 D:\JobTracker（不要加引号和文件名）">
+                <input type="text" id="newDataPath" placeholder="只填文件夹路径，如 D:\JobTracker">
                 <button class="btn-secondary" onclick="changeDataPath()">修改</button>
                 <button class="btn-secondary" onclick="openDataFolder()">打开文件夹</button>
               </div>
-              <div class="setting-hint">只填文件夹路径即可，程序会自动创建 job_data.json；支持带引号或带文件名的路径，会自动识别</div>
+              <div class="setting-hint">只填文件夹路径即可，程序会自动创建 job_data.json</div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>🤖 AI 助手设置</h3>
+          <div class="setting-row">
+            <div class="setting-label">启用 AI 助手</div>
+            <div class="setting-control">
+              <label class="switch"><input type="checkbox" id="aiEnabledToggle" onchange="toggleAIEnabled(this.checked)"><span class="slider"></span></label>
+              <div class="setting-hint">关闭后隐藏 AI 按钮和相关功能</div>
+            </div>
+          </div>
+          <div id="aiConfigArea" style="display:none">
+          <div class="setting-row">
+            <div class="setting-label">模型厂商</div>
+            <div class="setting-control">
+              <select id="aiProviderSelect" onchange="onAIProviderChange()" style="width:100%;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text)">
+                <option value="openai">OpenAI</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="qwen">通义千问</option>
+                <option value="doubao">豆包(火山引擎)</option>
+                <option value="zhipu">智谱AI</option>
+                <option value="ollama">本地 Ollama</option>
+                <option value="custom">自定义</option>
+              </select>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">API 地址</div>
+            <div class="setting-control">
+              <input type="text" id="aiApiUrl" placeholder="https://api.openai.com/v1" onchange="saveAISettings()" style="width:100%;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text)">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">API Key</div>
+            <div class="setting-control">
+              <input type="password" id="aiApiKey" placeholder="sk-..." onchange="saveAISettings()" style="width:100%;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text)">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">模型名称</div>
+            <div class="setting-control">
+              <select id="aiModelSelect" onchange="onAIModelChange()" style="width:100%;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text)">
+              </select>
+              <input type="text" id="aiModelCustom" placeholder="输入自定义模型名" style="width:100%;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text);margin-top:6px;display:none" oninput="settings.aiModel=this.value;saveConfig()">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label"></div>
+            <div class="setting-control">
+              <button class="ai-test-btn" onclick="testAIConnection()">测试连接</button>
+              <div class="ai-status" id="aiTestStatus" style="display:none"></div>
+              <div class="setting-hint">API Key 仅保存在本地，不会上传到任何服务器</div>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">语音识别服务</div>
+            <div class="setting-control">
+              <select id="sttProvider" onchange="saveAISettings()" style="width:100%;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text)">
+                <option value="system">系统内置（需科学上网）</option>
+                <option value="baidu">百度语音（国内推荐，免费）</option>
+              </select>
+              <div class="setting-hint">国内网络建议选百度语音，需在百度AI开放平台免费申请</div>
+            </div>
+          </div>
+          <div id="baiduConfig" style="display:none">
+            <div class="setting-row">
+              <div class="setting-label">百度 API Key</div>
+              <div class="setting-control">
+                <input type="text" id="baiduApiKey" placeholder="百度AI开放平台申请" onchange="saveAISettings()" style="width:100%;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text)">
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">百度 Secret Key</div>
+              <div class="setting-control">
+                <input type="password" id="baiduSecretKey" placeholder="百度AI开放平台申请" onchange="saveAISettings()" style="width:100%;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:13px;background:var(--input-bg);color:var(--text)">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>📄 我的简历档案</h3>
+          <div class="setting-hint" style="margin-bottom:12px">完善简历信息，AI 分析岗位匹配度和模拟面试时会参考你的背景</div>
+          <div style="margin-bottom:16px;padding:12px;background:var(--hover);border-radius:8px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">📎 简历附件</div>
+            <input type="file" id="resumeFileInput" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="handleResumeUpload(event)">
+            <button class="btn-secondary" onclick="document.getElementById('resumeFileInput').click()" style="padding:6px 14px;font-size:12px">上传简历文件</button>
+            <span style="font-size:11px;color:var(--text3);margin-left:8px">支持 PDF/Word/TXT，上传后自动识别文本</span>
+            <div id="resumeFileList" style="margin-top:8px"></div>
+          </div>
+          <div class="resume-section">
+            <h4>基本信息</h4>
+            <input type="text" id="resume_name" placeholder="姓名、学校、专业、学历、求职意向" oninput="saveResume()">
+          </div>
+          <div class="resume-section">
+            <h4>教育背景</h4>
+            <textarea id="resume_education" placeholder="学校、专业、学历、GPA、核心课程、奖学金等" oninput="saveResume()"></textarea>
+          </div>
+          <div class="resume-section">
+            <h4>实习/工作经历</h4>
+            <textarea id="resume_experience" placeholder="公司、岗位、时间、主要工作内容和成果" oninput="saveResume()"></textarea>
+          </div>
+          <div class="resume-section">
+            <h4>项目经历</h4>
+            <textarea id="resume_projects" placeholder="项目名称、角色、技术栈、成果" oninput="saveResume()"></textarea>
+          </div>
+          <div class="resume-section">
+            <h4>专业技能</h4>
+            <textarea id="resume_skills" placeholder="编程语言、工具、证书、语言能力等" oninput="saveResume()"></textarea>
+          </div>
+          <div class="resume-section">
+            <h4>获奖经历</h4>
+            <textarea id="resume_awards" placeholder="奖学金、竞赛奖项、荣誉称号等" oninput="saveResume()"></textarea>
+          </div>
+          <div class="resume-section">
+            <h4>证书/资格</h4>
+            <textarea id="resume_certificates" placeholder="英语四六级、计算机等级、专业资格证书等" oninput="saveResume()"></textarea>
+          </div>
+          <div class="resume-section">
+            <h4>语言能力</h4>
+            <textarea id="resume_languages" placeholder="英语（CET-6 500分）、普通话等" oninput="saveResume()"></textarea>
+          </div>
+          <div class="resume-section">
+            <h4>社团/学生工作</h4>
+            <textarea id="resume_clubs" placeholder="学生会、社团、志愿者经历等" oninput="saveResume()"></textarea>
+          </div>
+          <div class="resume-section">
+            <h4>求职意向</h4>
+            <textarea id="resume_jobIntention" placeholder="期望岗位、行业、城市、薪资范围" oninput="saveResume()"></textarea>
+          </div>
+          <div class="resume-section">
+            <h4>个人链接</h4>
+            <textarea id="resume_links" placeholder="GitHub、作品集、博客、LinkedIn等" oninput="saveResume()"></textarea>
+          </div>
+          <div class="resume-section">
+            <h4>自我评价</h4>
+            <textarea id="resume_selfEval" placeholder="个人优势、职业目标等" oninput="saveResume()"></textarea>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>🌙 外观</h3>
+          <div class="setting-row">
+            <div class="setting-label">深色模式</div>
+            <div class="setting-control" style="padding-top:4px">
+              <label class="switch"><input type="checkbox" id="darkModeSwitch" onchange="toggleDarkMode()"><span class="slider"></span></label>
             </div>
           </div>
         </div>
@@ -303,16 +569,16 @@ tbody tr:hover { background: #f8fafc; }
           <div class="setting-row">
             <div class="setting-label">英文字体</div>
             <div class="setting-control" style="padding-top:8px">
-              <select id="fontEnSelect" onchange="setFontEn(this.value)" style="width:280px;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none">
+              <select id="fontEnSelect" onchange="setFontEn(this.value)" style="width:280px;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:14px;outline:none;background:var(--input-bg);color:var(--text)">
               </select>
             </div>
           </div>
           <div class="setting-row">
             <div class="setting-label">中文字体</div>
             <div class="setting-control" style="padding-top:8px">
-              <select id="fontCnSelect" onchange="setFontCn(this.value)" style="width:280px;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;outline:none">
+              <select id="fontCnSelect" onchange="setFontCn(this.value)" style="width:280px;padding:8px 12px;border:1px solid var(--input-border);border-radius:6px;font-size:14px;outline:none;background:var(--input-bg);color:var(--text)">
               </select>
-              <div class="setting-hint">英文和中文字体可分别独立设置，实时生效</div>
+              <div class="setting-hint">英文和中文字体可分别独立设置</div>
             </div>
           </div>
           <div class="setting-row">
@@ -320,9 +586,9 @@ tbody tr:hover { background: #f8fafc; }
             <div class="setting-control" style="padding-top:8px">
               <div style="display:flex;align-items:center;gap:12px">
                 <input type="range" id="fontSizeSlider" min="12" max="50" step="1" value="13" oninput="setFontSize(this.value)" style="width:280px">
-                <span id="fontSizeValue" style="font-weight:600;color:#2563eb;min-width:40px">13px</span>
+                <span id="fontSizeValue" style="font-weight:600;color:var(--primary);min-width:40px">13px</span>
               </div>
-              <div class="setting-hint">拖动滑块调整投递记录表格的字体大小（12px - 50px），实时生效并自动保存</div>
+              <div class="setting-hint">调整投递记录表格的字体大小（12px - 50px）</div>
             </div>
           </div>
         </div>
@@ -332,7 +598,6 @@ tbody tr:hover { background: #f8fafc; }
             <div class="setting-label">边框风格</div>
             <div class="setting-control">
               <div class="border-style-grid" id="borderStyleGrid"></div>
-              <div class="setting-hint">一键切换所有标签（渠道/批次/状态）的边框样式</div>
             </div>
           </div>
         </div>
@@ -346,7 +611,7 @@ tbody tr:hover { background: #f8fafc; }
                 <button class="btn-secondary" onclick="addCustomOption('channel')">添加</button>
               </div>
               <div class="opt-color-grid" id="channelColorGrid"></div>
-              <div class="setting-hint">点击颜色块可修改该选项的标签颜色，× 删除自定义选项（系统默认不可删）</div>
+              <div class="setting-hint">⋮⋮ 拖动排序，色块改颜色，× 删除选项</div>
             </div>
           </div>
         </div>
@@ -377,6 +642,19 @@ tbody tr:hover { background: #f8fafc; }
           </div>
         </div>
         <div class="settings-section">
+          <h3>🏢 行业 - 选项与颜色</h3>
+          <div class="setting-row">
+            <div class="setting-label">管理选项</div>
+            <div class="setting-control">
+              <div class="add-opt-row">
+                <input type="text" id="newIndustryOpt" placeholder="输入新行业名称，回车添加" onkeydown="if(event.key==='Enter')addCustomOption('industry')">
+                <button class="btn-secondary" onclick="addCustomOption('industry')">添加</button>
+              </div>
+              <div class="opt-color-grid" id="industryColorGrid"></div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
           <h3>⚠️ 数据管理</h3>
           <div class="setting-row">
             <div class="setting-label">清空数据</div>
@@ -390,23 +668,23 @@ tbody tr:hover { background: #f8fafc; }
           <h3>ℹ️ 关于</h3>
           <div class="setting-row">
             <div class="setting-label">软件名称</div>
-            <div class="setting-control" style="padding-top:8px;color:#1f2937;font-size:14px;font-weight:600">秋招投递管理助手</div>
+            <div class="setting-control" style="padding-top:8px;color:var(--text);font-size:14px;font-weight:600">秋招投递管理助手</div>
           </div>
           <div class="setting-row">
             <div class="setting-label">版本</div>
-            <div class="setting-control" style="padding-top:8px;color:#6b7280;font-size:13px">v1.5.0</div>
+            <div class="setting-control" style="padding-top:8px;color:var(--text2);font-size:13px">v2.5.4</div>
           </div>
           <div class="setting-row">
             <div class="setting-label">开发者</div>
-            <div class="setting-control" style="padding-top:8px;color:#2563eb;font-size:14px;font-weight:600">只想睡好觉</div>
+            <div class="setting-control" style="padding-top:8px;color:var(--primary);font-size:14px;font-weight:600">只想睡好觉</div>
           </div>
           <div class="setting-row">
             <div class="setting-label">GitHub</div>
-            <div class="setting-control" style="padding-top:8px;font-size:13px"><a href="https://github.com/zhangWJPJ/job-tracker" target="_blank" style="color:#2563eb;text-decoration:none">github.com/zhangWJPJ/job-tracker</a></div>
+            <div class="setting-control" style="padding-top:8px;font-size:13px"><a href="https://github.com/zhangWJPJ/job-tracker" target="_blank" style="color:var(--primary);text-decoration:none">github.com/zhangWJPJ/job-tracker</a></div>
           </div>
           <div class="setting-row">
             <div class="setting-label">说明</div>
-            <div class="setting-control" style="padding-top:8px;color:#9ca3af;font-size:12px">数据完全本地存储，无需联网，开源免费</div>
+            <div class="setting-control" style="padding-top:8px;color:var(--text3);font-size:12px">数据完全本地存储，无需联网，开源免费</div>
           </div>
         </div>
       </div>
@@ -425,23 +703,45 @@ tbody tr:hover { background: #f8fafc; }
         <div class="form-group"><label>岗位名称 *</label><input type="text" id="f_position" placeholder="如：产品经理"></div>
       </div>
       <div class="form-row">
+        <div class="form-group"><label>行业</label><div class="select-with-add" id="swa_industry"><select id="f_industry"></select><button class="add-opt-btn" onclick="showInlineAdd('industry')" title="添加自定义行业">+</button></div></div>
         <div class="form-group"><label>投递渠道</label><div class="select-with-add" id="swa_channel"><select id="f_channel"></select><button class="add-opt-btn" onclick="showInlineAdd('channel')" title="添加自定义渠道">+</button></div></div>
+      </div>
+      <div class="form-row">
         <div class="form-group"><label>投递批次</label><div class="select-with-add" id="swa_batch"><select id="f_batch"></select><button class="add-opt-btn" onclick="showInlineAdd('batch')" title="添加自定义批次">+</button></div></div>
-      </div>
-      <div class="form-row">
         <div class="form-group"><label>投递日期</label><input type="date" id="f_date"></div>
-        <div class="form-group"><label>当前状态</label><div class="select-with-add" id="swa_status"><select id="f_status"></select><button class="add-opt-btn" onclick="showInlineAdd('status')" title="添加自定义状态">+</button></div></div>
       </div>
       <div class="form-row">
+        <div class="form-group"><label>当前状态</label><div class="select-with-add" id="swa_status"><select id="f_status"></select><button class="add-opt-btn" onclick="showInlineAdd('status')" title="添加自定义状态">+</button></div></div>
         <div class="form-group"><label>薪资范围</label><input type="text" id="f_salary" placeholder="如：15-20k"></div>
-        <div class="form-group"><label>工作地点</label><input type="text" id="f_location" placeholder="如：北京"></div>
       </div>
-      <div class="form-group"><label>投递网址</label><input type="url" id="f_applyUrl" placeholder="https://..."></div>
+      <div class="form-row">
+        <div class="form-group"><label>工作地点</label><input type="text" id="f_location" placeholder="如：北京"></div>
+        <div class="form-group"><label>投递网址</label><input type="url" id="f_applyUrl" placeholder="https://..."></div>
+      </div>
       <div class="form-group"><label>备注</label><textarea id="f_note" rows="2" placeholder="HR联系方式、面试感受等"></textarea></div>
+      <div class="form-group"><label>岗位描述（JD）</label><textarea id="f_jobDescription" rows="4" placeholder="粘贴岗位描述/职责要求，AI可据此分析匹配度和准备面试"></textarea></div>
+      <div class="next-event-section">
+        <h4>⏰ 下次事项（笔试/面试等）</h4>
+        <div class="ne-row">
+          <input type="text" id="f_ne_title" placeholder="事项名称，如：腾讯笔试" style="flex:1">
+          <input type="date" id="f_ne_date">
+          <input type="time" id="f_ne_time">
+        </div>
+        <input type="text" id="f_ne_note" placeholder="备注（可选），如：链接、会议室号" style="width:100%;padding:6px 10px;border:1px solid #fcd34d;border-radius:4px;font-size:12px;background:#fffbeb;color:#92400e">
+      </div>
+      <div class="history-section" id="eventHistorySection" style="display:none">
+        <h4>📋 待办历史（已完成）</h4>
+        <div id="eventHistoryList"></div>
+      </div>
       <div class="history-section" id="historySection" style="display:none">
         <h4>状态历史</h4>
         <div class="timeline" id="historyTimeline"></div>
         <button class="add-history-btn" onclick="addHistoryItem()">+ 更新状态</button>
+      </div>
+      <div class="history-section" id="interviewSection" style="display:none">
+        <h4>面试记录 / 面经</h4>
+        <div id="interviewList"></div>
+        <button class="add-history-btn" onclick="addInterviewItem()">+ 添加面试记录</button>
       </div>
     </div>
     <div class="modal-footer">
@@ -451,6 +751,58 @@ tbody tr:hover { background: #f8fafc; }
   </div>
 </div>
 <div class="filter-dropdown" id="filterDropdown"></div>
+<div class="col-menu" id="colMenu">
+  <div class="col-menu-title">显示/隐藏列</div>
+  <div id="colMenuList"></div>
+</div>
+<div class="ai-overlay" id="aiOverlay" onclick="toggleAISidebar()"></div>
+<!-- 回收站弹窗 -->
+<div class="modal-overlay" id="recycleBinModal" style="display:none;z-index:100">
+  <div class="modal" style="max-width:900px;max-height:80vh;display:flex;flex-direction:column">
+    <div class="modal-header">
+      <h2>🗑️ 回收站</h2>
+      <button class="modal-close" onclick="closeRecycleBin()">×</button>
+    </div>
+    <div style="padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px;color:var(--text2)">删除的记录保留30天，超过自动清理</span>
+      <button class="btn-danger" onclick="emptyRecycleBin()" style="padding:6px 14px;font-size:12px">清空回收站</button>
+    </div>
+    <div id="recycleBinList" style="flex:1;overflow-y:auto;padding:12px 20px"></div>
+  </div>
+</div>
+<div class="ai-sidebar" id="aiSidebar">
+  <div class="ai-sidebar-header">
+    <h3>🤖 AI 求职助手</h3>
+    <button class="ai-sidebar-close" onclick="toggleAISidebar()">×</button>
+  </div>
+  <div class="ai-context" id="aiContext">
+    <span>当前关联：</span>
+    <span class="ctx-tag" id="aiContextTag">全部数据</span>
+    <button class="btn-secondary" style="padding:2px 8px;font-size:11px;margin-left:auto" onclick="clearAIContext()">取消关联</button>
+  </div>
+  <div class="ai-tabs">
+    <div class="ai-tab active" data-tab="data" onclick="switchAITab('data')">📊 数据问答</div>
+    <div class="ai-tab" data-tab="analyze" onclick="switchAITab('analyze')">💡 岗位分析</div>
+    <div class="ai-tab" data-tab="interview" onclick="switchAITab('interview')">🎯 面试准备</div>
+    <div class="ai-tab" data-tab="resume" onclick="switchAITab('resume')">📝 简历优化</div>
+    <div class="ai-tab" data-tab="review" onclick="switchAITab('review')">🔄 智能复盘</div>
+  </div>
+  <div class="ai-chat-area" id="aiChatArea">
+    <div class="ai-msg assistant">你好！我是你的 AI 求职助手。你可以问我关于投递数据的任何问题，比如「我投了多少家？通过率多少？」</div>
+  </div>
+  <div id="aiQuickActions" class="ai-quick-actions" style="padding:0 16px 8px"></div>
+  <div id="interviewControl" class="interview-control" style="display:none;padding:0 16px 8px">
+    <button class="btn-start-interview" onclick="startMockInterview()">🎤 开始模拟面试</button>
+    <button class="btn-end-interview" onclick="endMockInterview()" style="display:none">⏹️ 结束并点评</button>
+    <button class="voice-btn" id="ttsBtn" onclick="toggleTTS()" title="AI语音朗读">🔊 语音</button>
+    <button class="voice-btn" id="sttBtn" onclick="toggleSTT()" title="点击开始/停止回答">🎙️ 开始回答</button>
+    <button class="voice-btn" id="finishBtn" onclick="finishAnswer()" style="display:none;background:#10b981;color:#fff;border-color:#10b981" title="回答完成，AI继续提问">✅ 作答完成</button>
+  </div>
+  <div class="ai-input-area">
+    <textarea id="aiInput" placeholder="输入你的问题..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage();}"></textarea>
+    <button class="ai-send-btn" id="aiSendBtn" onclick="sendAIMessage()">发送</button>
+  </div>
+</div>
 <script>
 const fs = require('fs');
 const path = require('path');
@@ -460,13 +812,16 @@ const { shell } = require('electron');
 const DEFAULT_CHANNELS = ['官网','牛客','BOSS直聘','猎聘','前程无忧','智联招聘','内推','其他'];
 const DEFAULT_BATCHES = ['校招','实习','社招','其他'];
 const DEFAULT_STATUSES = ['已投递','简历筛选','测评','笔试','一面','二面','三面/终面','Offer','已拒绝','已挂'];
+const DEFAULT_INDUSTRIES = ['互联网','药企/医疗','金融','咨询','快消','制造业','国企/事业单位','其他'];
 const DEFAULT_COLORS = {
   channel: {'官网':'#dbeafe','牛客':'#d1fae5','BOSS直聘':'#cffafe','猎聘':'#ffedd5','前程无忧':'#ede9fe','智联招聘':'#fce7f3','内推':'#fee2e2','其他':'#f3f4f6'},
   batch: {'校招':'#e0e7ff','实习':'#ccfbf1','社招':'#fef3c7','其他':'#f1f5f9'},
-  status: {'已投递':'#f3f4f6','简历筛选':'#ede9fe','测评':'#fef3c7','笔试':'#ffedd5','一面':'#dbeafe','二面':'#dbeafe','三面/终面':'#c7d2fe','Offer':'#d1fae5','已拒绝':'#fee2e2','已挂':'#374151'}
+  status: {'已投递':'#f3f4f6','简历筛选':'#ede9fe','测评':'#fef3c7','笔试':'#ffedd5','一面':'#dbeafe','二面':'#dbeafe','三面/终面':'#c7d2fe','Offer':'#d1fae5','已拒绝':'#fee2e2','已挂':'#374151'},
+  industry: {'互联网':'#dbeafe','药企/医疗':'#d1fae5','金融':'#fef3c7','咨询':'#ede9fe','快消':'#fce7f3','制造业':'#ffedd5','国企/事业单位':'#e0e7ff','其他':'#f3f4f6'}
 };
 const STATUS_COLORS = {'已投递':'#9ca3af','简历筛选':'#8b5cf6','测评':'#f59e0b','笔试':'#f97316','一面':'#3b82f6','二面':'#2563eb','三面/终面':'#1d4ed8','Offer':'#10b981','已拒绝':'#ef4444','已挂':'#374151'};
-const DEFAULT_COL_WIDTHS = {company:160, position:180, channel:110, batch:80, date:110, status:100, salary:80, location:80, actions:80};
+const PROGRESS_STAGES = ['已投递','简历筛选','测评','笔试','一面','二面','三面/终面','Offer'];
+const DEFAULT_COL_WIDTHS = {select:40, company:140, position:150, industry:90, channel:90, batch:70, date:100, status:120, salary:70, location:70, actions:70};
 const BORDER_STYLES = [
   {id:'none', name:'无边框', desc:'纯净填充'},
   {id:'capsule', name:'胶囊风', desc:'大圆角+描边'},
@@ -474,14 +829,6 @@ const BORDER_STYLES = [
   {id:'card', name:'卡片描边', desc:'小圆角+细边框'},
   {id:'solid', name:'实心加粗', desc:'大圆角加粗字'}
 ];
-
-let records = [];
-let filters = { company: [], channel: [], batch: [], status: [], location: [] };
-let dateSort = 'desc';
-let colWidths = {...DEFAULT_COL_WIDTHS};
-let customOptions = { channel: [], batch: [], status: [] };
-let allOptions = { channel: [], batch: [], status: [] };
-let optionColors = { channel: {}, batch: {}, status: {} };
 const EN_FONTS = [
   {id:'times', name:'Times New Roman', family:'"Times New Roman"'},
   {id:'arial', name:'Arial', family:'Arial'},
@@ -499,10 +846,65 @@ const CN_FONTS = [
   {id:'youyuan', name:'幼圆', family:'"YouYuan", "幼圆"'}
 ];
 
-let settings = { dataPath: '', borderStyle: 'none', fontSize: 13, fontCn: 'kaiti', fontEn: 'times' };
+let records = [];
+let deletedRecords = [];
+let filters = { company: [], industry: [], channel: [], batch: [], status: [], location: [] };
+let dateSort = 'desc';
+let selectedIds = new Set();
+let hiddenCols = new Set();
+const COL_NAMES = {select:'选择', company:'公司名称', position:'岗位', industry:'行业', channel:'渠道', batch:'批次', date:'投递日期', status:'状态', salary:'薪资', location:'地点', actions:'操作'};
+
+// AI 厂商配置
+const AI_PROVIDERS = {
+  openai: { name:'OpenAI', url:'https://api.openai.com/v1', models:['gpt-4o-mini','gpt-4o','gpt-3.5-turbo'] },
+  deepseek: { name:'DeepSeek', url:'https://api.deepseek.com/v1', models:['deepseek-chat','deepseek-reasoner'] },
+  qwen: { name:'通义千问', url:'https://dashscope.aliyuncs.com/compatible-mode/v1', models:['qwen-plus','qwen-turbo','qwen-max','qwen-long'] },
+  doubao: { name:'豆包(火山引擎)', url:'https://ark.cn-beijing.volces.com/api/v3', models:['doubao-pro-4k','doubao-pro-32k','doubao-lite-4k'] },
+  zhipu: { name:'智谱AI', url:'https://open.bigmodel.cn/api/paas/v4', models:['glm-4','glm-4-flash','glm-4-plus'] },
+  ollama: { name:'本地 Ollama', url:'http://localhost:11434/v1', models:['qwen2.5:7b','llama3.1:8b','mistral:7b'] },
+  custom: { name:'自定义', url:'', models:[] }
+};
+
+let aiChatHistory = { data:[], analyze:[], interview:[], resume:[], review:[] };
+let aiCurrentTab = 'data';
+let aiContextRecordId = null;
+let aiStreaming = false;
+let mockInterviewActive = false;
+let interviewStage = '';
+let interviewQuestionCount = 0;
+const INTERVIEW_STAGES = ['自我介绍','项目深挖','专业技能','行为面试','反问环节'];
+// 实时语音面试状态
+let interviewAutoMode = false;  // 全自动语音模式
+let interviewState = 'idle';    // idle / thinking / speaking / listening / processing
+let silenceTimer = null;        // 静音检测定时器
+let lastSpeechTime = 0;
+let ttsEnabled = false;
+let sttEnabled = false;
+let speechRecognition = null;
+// 百度语音识别
+let baiduToken = null;
+let baiduTokenTime = 0;
+let mediaRecorder = null;
+let audioChunks = [];
+let audioContext = null;
+let mediaStream = null;
+
+const QUICK_PROMPTS = {
+  data: ['我投了多少家？','通过率多少？','哪个渠道回复率最高？','帮我分析投递情况','各行业分布如何？'],
+  analyze: ['分析岗位匹配度','这个岗位值得投吗？','简历需要怎么优化？','这个岗位的核心要求是什么？'],
+  interview: ['预测面试问题','自我介绍怎么说','常见问题有哪些？','反问环节问什么？'],
+  resume: ['生成定制求职信','优化简历内容','这段经历怎么写更好？'],
+  review: ['帮我复盘这次面试','我哪里表现不好？','下次怎么改进？']
+};
+let colWidths = {...DEFAULT_COL_WIDTHS};
+let customOptions = { channel: [], batch: [], status: [], industry: [] };
+let allOptions = { channel: [], batch: [], status: [], industry: [] };
+let optionColors = { channel: {}, batch: {}, status: {}, industry: {} };
+let settings = { dataPath: '', borderStyle: 'none', fontSize: 13, fontCn: 'kaiti', fontEn: 'times', darkMode: false, aiEnabled: true, aiProvider: 'deepseek', aiApiUrl: '', aiApiKey: '', aiModel: 'deepseek-chat', sttProvider: 'baidu', baiduApiKey: '', baiduSecretKey: '', resume: {name:'', education:'', experience:'', skills:'', projects:'', selfEval:'', awards:'', certificates:'', languages:'', clubs:'', jobIntention:'', links:'', resumeFiles:[]} };
 let editingId = null;
 let currentFilterCol = null;
 let inlineAddActive = null;
+let remindedEvents = new Set();
 
 const CONFIG_DIR = path.join(process.env.APPDATA || path.join(os.homedir(), '.config'), 'JobTracker');
 if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
@@ -510,24 +912,11 @@ const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 let DATA_FILE = path.join(CONFIG_DIR, 'job_data.json');
 
 function today() { return new Date().toISOString().split('T')[0]; }
-
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  return {r,g,b};
-}
-function getTextColor(bgHex) {
-  const {r,g,b} = hexToRgb(bgHex);
-  const luminance = (0.299*r + 0.587*g + 0.114*b)/255;
-  return luminance > 0.6 ? '#1f2937' : '#ffffff';
-}
-function getOptColor(type, val) {
-  return optionColors[type] && optionColors[type][val] ? optionColors[type][val] : (DEFAULT_COLORS[type] && DEFAULT_COLORS[type][val] ? DEFAULT_COLORS[type][val] : '#fef3c7');
-}
-function getBadgeStyle(type, val) {
-  const bg = getOptColor(type, val);
-  const color = getTextColor(bg);
-  return `background:${bg};color:${color};`;
-}
+function nowTime() { return new Date().toTimeString().slice(0,5); }
+function hexToRgb(hex) { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return {r,g,b}; }
+function getTextColor(bgHex) { const {r,g,b}=hexToRgb(bgHex); const luminance=(0.299*r+0.587*g+0.114*b)/255; return luminance>0.6?'#1f2937':'#ffffff'; }
+function getOptColor(type, val) { return optionColors[type]&&optionColors[type][val]?optionColors[type][val]:(DEFAULT_COLORS[type]&&DEFAULT_COLORS[type][val]?DEFAULT_COLORS[type][val]:'#fef3c7'); }
+function getBadgeStyle(type, val) { const bg=getOptColor(type,val); const color=getTextColor(bg); return `background:${bg};color:${color};`; }
 
 function loadConfig() {
   try {
@@ -537,66 +926,62 @@ function loadConfig() {
       customOptions = cfg.customOptions || customOptions;
       colWidths = {...DEFAULT_COL_WIDTHS, ...(cfg.colWidths || {})};
       optionColors = cfg.optionColors || optionColors;
-      if (cfg.allOptions) {
-        allOptions = cfg.allOptions;
-      } else {
+      hiddenCols = new Set(cfg.hiddenCols || []);
+      if (cfg.allOptions) { allOptions = cfg.allOptions; }
+      else {
         allOptions = {
-          channel: [...DEFAULT_CHANNELS, ...customOptions.channel],
-          batch: [...DEFAULT_BATCHES, ...customOptions.batch],
-          status: [...DEFAULT_STATUSES, ...customOptions.status]
+          channel: [...DEFAULT_CHANNELS, ...(customOptions.channel||[])],
+          batch: [...DEFAULT_BATCHES, ...(customOptions.batch||[])],
+          status: [...DEFAULT_STATUSES, ...(customOptions.status||[])],
+          industry: [...DEFAULT_INDUSTRIES, ...(customOptions.industry||[])]
         };
       }
-      if (settings.dataPath && fs.existsSync(settings.dataPath)) {
-        DATA_FILE = path.join(settings.dataPath, 'job_data.json');
-      }
+      if (!allOptions.industry || allOptions.industry.length===0) allOptions.industry = [...DEFAULT_INDUSTRIES];
+      if (settings.dataPath && fs.existsSync(settings.dataPath)) DATA_FILE = path.join(settings.dataPath, 'job_data.json');
     } else {
-      allOptions = {
-        channel: [...DEFAULT_CHANNELS],
-        batch: [...DEFAULT_BATCHES],
-        status: [...DEFAULT_STATUSES]
-      };
+      allOptions = { channel:[...DEFAULT_CHANNELS], batch:[...DEFAULT_BATCHES], status:[...DEFAULT_STATUSES], industry:[...DEFAULT_INDUSTRIES] };
     }
   } catch(e) { console.error('加载配置失败:', e); }
 }
-
 function saveConfig() {
-  try {
-    const cfg = { settings, customOptions, allOptions, colWidths, optionColors };
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), 'utf-8');
-  } catch(e) { console.error('保存配置失败:', e); }
+  try { const cfg = { settings, customOptions, allOptions, colWidths, optionColors, hiddenCols: [...hiddenCols] }; fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), 'utf-8'); }
+  catch(e) { console.error('保存配置失败:', e); }
 }
-
 function loadAllData() {
   try {
-    if (fs.existsSync(DATA_FILE)) {
-      const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-      records = data.records || [];
-      filters = data.filters || { company: [], channel: [], batch: [], status: [], location: [] };
-    }
+    if (fs.existsSync(DATA_FILE)) { const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8')); records = data.records || []; deletedRecords = data.deletedRecords || []; filters = { company:[], industry:[], channel:[], batch:[], status:[], location:[], ...(data.filters||{}) }; }
   } catch(e) { console.error('加载数据失败:', e); records = []; }
-  records.forEach(r => { if(!r.batch) r.batch='校招'; if(!r.statusHistory||!Array.isArray(r.statusHistory)) r.statusHistory=[{status:r.status||'已投递',date:r.date||today(),note:'历史数据'}]; if(!r.status) r.status=r.statusHistory[r.statusHistory.length-1]?.status||'已投递'; });
+  // 自动清理超过30天的回收站记录
+  const now = Date.now();
+  deletedRecords = deletedRecords.filter(r => now - (r.deletedAt || 0) < 30*24*3600*1000);
+  records.forEach(r => {
+    if(!r.batch) r.batch='校招';
+    if(!r.industry) r.industry='其他';
+    if(!r.statusHistory||!Array.isArray(r.statusHistory)) r.statusHistory=[{status:r.status||'已投递',date:r.date||today(),note:'历史数据'}];
+    if(!r.status) r.status=r.statusHistory[r.statusHistory.length-1]?.status||'已投递';
+    if(!r.interviews) r.interviews = [];
+    if(!r.nextEvent) r.nextEvent = {title:'',date:'',time:'',note:''};
+    if(!r.eventHistory) r.eventHistory = [];
+    if(!r.jobDescription) r.jobDescription = '';
+  });
 }
-
 function saveAllData() {
-  try {
-    const data = { records, filters };
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
-    return true;
-  } catch(e) { console.error('保存数据失败:', e); alert('保存失败: ' + e.message); return false; }
+  try { const data = { records, deletedRecords, filters }; fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); return true; }
+  catch(e) { console.error('保存数据失败:', e); alert('保存失败: '+e.message); return false; }
 }
 
 function getAllChannels() { return allOptions.channel; }
 function getAllBatches() { return allOptions.batch; }
 function getAllStatuses() { return allOptions.status; }
-function isCustom(type, val) { return !DEFAULT_CHANNELS.concat(DEFAULT_BATCHES).concat(DEFAULT_STATUSES).includes(val); }
+function getAllIndustries() { return allOptions.industry; }
+function isCustom(type, val) { return ![...DEFAULT_CHANNELS,...DEFAULT_BATCHES,...DEFAULT_STATUSES,...DEFAULT_INDUSTRIES].includes(val); }
 
 function populateSelects() {
-  const ch = document.getElementById('f_channel');
-  const ba = document.getElementById('f_batch');
-  const st = document.getElementById('f_status');
-  ch.innerHTML = getAllChannels().map(o=>`<option>${o}</option>`).join('');
-  ba.innerHTML = getAllBatches().map(o=>`<option>${o}</option>`).join('');
-  st.innerHTML = getAllStatuses().map(o=>`<option>${o}</option>`).join('');
+  document.getElementById('f_channel').innerHTML = getAllChannels().map(o=>`<option>${o}</option>`).join('');
+  document.getElementById('f_batch').innerHTML = getAllBatches().map(o=>`<option>${o}</option>`).join('');
+  document.getElementById('f_status').innerHTML = getAllStatuses().map(o=>`<option>${o}</option>`).join('');
+  document.getElementById('f_industry').innerHTML = getAllIndustries().map(o=>`<option>${o}</option>`).join('');
+  document.getElementById('batchStatusSelect').innerHTML = '<option value="">批量改状态...</option>' + getAllStatuses().map(o=>`<option>${o}</option>`).join('');
 }
 
 function showInlineAdd(type) {
@@ -605,121 +990,77 @@ function showInlineAdd(type) {
   const container = document.getElementById('swa_' + type);
   const select = container.querySelector('select');
   const btn = container.querySelector('.add-opt-btn');
-  select.style.display = 'none';
-  btn.style.display = 'none';
+  select.style.display = 'none'; btn.style.display = 'none';
   const input = document.createElement('input');
-  input.type = 'text';
-  input.className = 'inline-input';
-  input.placeholder = '输入新' + (type==='channel'?'渠道':type==='batch'?'批次':'状态') + '名，回车确认';
+  input.type = 'text'; input.className = 'inline-input';
+  input.placeholder = '输入新' + (type==='channel'?'渠道':type==='batch'?'批次':type==='industry'?'行业':'状态') + '名，回车确认';
   input.id = 'inlineAdd_' + type;
-  input.onkeydown = (e) => {
-    if (e.key === 'Enter') { confirmInlineAdd(type); }
-    else if (e.key === 'Escape') { cancelInlineAdd(type); }
-  };
-  input.onblur = () => { setTimeout(() => cancelInlineAdd(type), 200); };
-  container.insertBefore(input, btn);
-  input.focus();
+  input.onkeydown = (e) => { if(e.key==='Enter') confirmInlineAdd(type); else if(e.key==='Escape') cancelInlineAdd(type); };
+  input.onblur = () => { setTimeout(()=>cancelInlineAdd(type), 200); };
+  container.insertBefore(input, btn); input.focus();
 }
-
 function confirmInlineAdd(type) {
-  const input = document.getElementById('inlineAdd_' + type);
-  if (!input) return;
+  const input = document.getElementById('inlineAdd_' + type); if(!input) return;
   const val = input.value.trim();
   if (val) {
-    const all = type==='channel'?getAllChannels():type==='batch'?getAllBatches():getAllStatuses();
+    const all = type==='channel'?getAllChannels():type==='batch'?getAllBatches():type==='industry'?getAllIndustries():getAllStatuses();
     if (!all.includes(val)) {
-      allOptions[type].push(val);
-      customOptions[type].push(val);
-      saveConfig();
-      populateSelects();
+      allOptions[type].push(val); customOptions[type].push(val); saveConfig(); populateSelects();
       document.getElementById('f_'+type).value = val;
     }
   }
   cancelInlineAdd(type);
 }
-
 function cancelInlineAdd(type) {
-  const input = document.getElementById('inlineAdd_' + type);
-  if (input) input.remove();
+  const input = document.getElementById('inlineAdd_' + type); if(input) input.remove();
   const container = document.getElementById('swa_' + type);
-  if (container) {
-    container.querySelector('select').style.display = '';
-    container.querySelector('.add-opt-btn').style.display = '';
-  }
+  if (container) { container.querySelector('select').style.display=''; container.querySelector('.add-opt-btn').style.display=''; }
   inlineAddActive = null;
 }
 
 function applyColWidths() {
-  document.querySelectorAll('thead th').forEach(th => {
-    const col = th.dataset.col;
-    if (col && colWidths[col]) th.style.width = colWidths[col] + 'px';
-  });
+  document.querySelectorAll('thead th').forEach(th => { const col=th.dataset.col; if(col&&colWidths[col]) th.style.width=colWidths[col]+'px'; });
 }
-
 function applyBorderStyle() {
   const root = document.getElementById('appRoot');
-  BORDER_STYLES.forEach(bs => root.classList.remove('bs-' + bs.id));
-  root.classList.add('bs-' + (settings.borderStyle || 'none'));
+  BORDER_STYLES.forEach(bs => root.classList.remove('bs-'+bs.id));
+  root.classList.add('bs-'+(settings.borderStyle||'none'));
 }
-
-function applyFontSize() {
-  document.documentElement.style.setProperty('--table-font-size', (settings.fontSize || 14) + 'px');
-}
-
+function applyFontSize() { document.documentElement.style.setProperty('--table-font-size', (settings.fontSize||13)+'px'); }
 function applyFontFamily() {
-  const en = EN_FONTS.find(f => f.id === (settings.fontEn || 'times'));
-  const cn = CN_FONTS.find(f => f.id === (settings.fontCn || 'kaiti'));
-  const enFamily = en ? en.family : '"Times New Roman"';
-  const cnFamily = cn ? cn.family : '"楷体_GB2312", "KaiTi_GB2312", "STKaiti"';
-  document.documentElement.style.setProperty('--app-font-family', `${enFamily}, ${cnFamily}, serif`);
+  const en = EN_FONTS.find(f=>f.id===(settings.fontEn||'times'));
+  const cn = CN_FONTS.find(f=>f.id===(settings.fontCn||'kaiti'));
+  document.documentElement.style.setProperty('--app-font-family', `${en?en.family:'"Times New Roman"'}, ${cn?cn.family:'"楷体_GB2312"'}, serif`);
 }
-
-function setFontCn(id) {
-  settings.fontCn = id;
-  applyFontFamily();
-  saveConfig();
+function applyDarkMode() {
+  if (settings.darkMode) document.body.classList.add('dark-mode');
+  else document.body.classList.remove('dark-mode');
 }
-
-function setFontEn(id) {
-  settings.fontEn = id;
-  applyFontFamily();
-  saveConfig();
-}
-
-function setFontSize(size) {
-  settings.fontSize = parseInt(size);
-  applyFontSize();
-  saveConfig();
-  document.getElementById('fontSizeValue').textContent = settings.fontSize + 'px';
-}
+function setFontCn(id) { settings.fontCn=id; applyFontFamily(); saveConfig(); }
+function setFontEn(id) { settings.fontEn=id; applyFontFamily(); saveConfig(); }
+function setFontSize(size) { settings.fontSize=parseInt(size); applyFontSize(); saveConfig(); document.getElementById('fontSizeValue').textContent=settings.fontSize+'px'; }
+function toggleDarkMode() { settings.darkMode = document.getElementById('darkModeSwitch').checked; applyDarkMode(); saveConfig(); }
 
 function setupColResize() {
-  let resizing = null, startX = 0, startWidth = 0;
+  let resizing=null, startX=0, startWidth=0;
   document.querySelectorAll('.col-resizer').forEach(resizer => {
     resizer.addEventListener('mousedown', (e) => {
       e.preventDefault(); e.stopPropagation();
-      const th = resizer.parentElement; const col = th.dataset.col;
-      resizing = col; startX = e.pageX; startWidth = colWidths[col] || th.offsetWidth;
-      resizer.classList.add('active');
-      document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none';
+      const th=resizer.parentElement; const col=th.dataset.col;
+      resizing=col; startX=e.pageX; startWidth=colWidths[col]||th.offsetWidth;
+      resizer.classList.add('active'); document.body.style.cursor='col-resize'; document.body.style.userSelect='none';
     });
   });
   document.addEventListener('mousemove', (e) => {
-    if (!resizing) return;
-    const newWidth = Math.max(50, startWidth + (e.pageX - startX));
-    colWidths[resizing] = newWidth;
-    const th = document.querySelector(`thead th[data-col="${resizing}"]`);
-    if (th) th.style.width = newWidth + 'px';
+    if(!resizing) return;
+    const newWidth=Math.max(40, startWidth+(e.pageX-startX));
+    colWidths[resizing]=newWidth;
+    const th=document.querySelector(`thead th[data-col="${resizing}"]`); if(th) th.style.width=newWidth+'px';
   });
   document.addEventListener('mouseup', () => {
-    if (resizing) {
-      document.querySelectorAll('.col-resizer').forEach(r => r.classList.remove('active'));
-      document.body.style.cursor = ''; document.body.style.userSelect = '';
-      resizing = null; saveConfig();
-    }
+    if(resizing) { document.querySelectorAll('.col-resizer').forEach(r=>r.classList.remove('active')); document.body.style.cursor=''; document.body.style.userSelect=''; resizing=null; saveConfig(); }
   });
 }
-
 function setupNav() {
   document.querySelectorAll('.nav button').forEach(btn => { btn.onclick = () => {
     document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
@@ -727,20 +1068,125 @@ function setupNav() {
     btn.classList.add('active'); document.getElementById('page-'+btn.dataset.page).classList.add('active');
     if(btn.dataset.page==='stats') renderStats();
     if(btn.dataset.page==='settings') renderSettings();
-    window.scrollTo(0, 0);
+    window.scrollTo(0,0);
   };});
 }
-
 function setupScroll() {
   window.addEventListener('scroll', () => {
-    const hero = document.querySelector('.hero');
-    if (!hero) return;
-    if (window.scrollY > 60) {
-      hero.classList.add('collapsed');
-    } else {
-      hero.classList.remove('collapsed');
+    const hero = document.querySelector('.hero'); if(!hero) return;
+    if(window.scrollY>60) hero.classList.add('collapsed'); else hero.classList.remove('collapsed');
+  });
+}
+
+// 进度条
+function getProgress(status) {
+  const idx = PROGRESS_STAGES.indexOf(status);
+  if (idx === -1) {
+    if (status === '已拒绝' || status === '已挂') return { percent: 100, color: '#ef4444', label: status };
+    return { percent: 0, color: '#9ca3af', label: status };
+  }
+  const percent = ((idx + 1) / PROGRESS_STAGES.length) * 100;
+  const color = STATUS_COLORS[status] || '#3b82f6';
+  return { percent, color, label: `${idx+1}/${PROGRESS_STAGES.length}` };
+}
+function renderProgressBar(r) {
+  const p = getProgress(r.status);
+  const stStyle = getBadgeStyle('status', r.status);
+  return `<div><span class="badge" style="${stStyle}">${r.status}</span><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${p.percent}%;background:${p.color}"></div></div><div class="progress-label">${p.label}</div></div>`;
+}
+
+// 重复检测
+function checkDuplicate(company, position, excludeId) {
+  return records.find(r => r.id !== excludeId && r.company === company && r.position === position);
+}
+
+// 待办事项
+function renderUpcoming() {
+  const list = document.getElementById('upcomingList');
+  const todayStr = today();
+  const upcoming = records
+    .filter(r => r.nextEvent && r.nextEvent.title && r.nextEvent.date && !r.nextEvent.done)
+    .map(r => ({...r.nextEvent, company: r.company, id: r.id}))
+    .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time))
+    .slice(0, 5);
+  if (upcoming.length === 0) { list.innerHTML = '<span class="upcoming-empty">暂无待办事项</span>'; return; }
+  list.innerHTML = upcoming.map(ev => {
+    let cls = 'upcoming-item';
+    if (ev.date === todayStr) cls += ' today';
+    else if (ev.date < todayStr) cls += ' urgent';
+    const timeStr = ev.time ? ' ' + ev.time : '';
+    return `<div class="${cls}" onclick="openModal('${ev.id}')" title="${ev.note||''}" style="display:flex;align-items:center;gap:8px">
+      <span style="flex:1">${ev.company} - ${ev.title} (${ev.date}${timeStr})</span>
+      <button onclick="event.stopPropagation();completeEvent('${ev.id}')" style="background:#10b981;color:white;border:none;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;flex-shrink:0">✓ 完成</button>
+    </div>`;
+  }).join('');
+}
+function completeEvent(id) {
+  const r = records.find(x => x.id === id);
+  if (r && r.nextEvent && r.nextEvent.title) {
+    if (!r.eventHistory) r.eventHistory = [];
+    r.eventHistory.push({...r.nextEvent, completedAt: Date.now()});
+    r.nextEvent = {title:'',date:'',time:'',note:''};
+    saveAllData();
+    renderUpcoming();
+    renderTable();
+  }
+}
+function checkReminders() {
+  const now = new Date();
+  const nowStr = now.toISOString().slice(0,16); // YYYY-MM-DDTHH:MM
+  records.forEach(r => {
+    if (r.nextEvent && r.nextEvent.title && r.nextEvent.date && r.nextEvent.time && !r.nextEvent.done) {
+      const eventDT = r.nextEvent.date + 'T' + r.nextEvent.time;
+      const diff = (new Date(eventDT) - now) / 60000; // minutes
+      const key = r.id + '_' + eventDT;
+      if (diff >= 0 && diff <= 30 && !remindedEvents.has(key)) {
+        remindedEvents.add(key);
+        alert(`⏰ 提醒：${r.company} - ${r.nextEvent.title}\n时间：${r.nextEvent.date} ${r.nextEvent.time}\n${r.nextEvent.note||''}`);
+      }
     }
   });
+}
+
+// 面试记录
+function renderInterviews() {
+  const r = records.find(x=>x.id===editingId); if(!r) return;
+  const list = document.getElementById('interviewList');
+  if (!r.interviews) r.interviews = [];
+  list.innerHTML = r.interviews.map((iv, i) => `
+    <div class="interview-item">
+      <div class="iv-row">
+        <input type="date" value="${iv.date||''}" onchange="updateInterview(${i},'date',this.value)">
+        <select onchange="updateInterview(${i},'round',this.value)">
+          <option ${iv.round==='一面'?'selected':''}>一面</option>
+          <option ${iv.round==='二面'?'selected':''}>二面</option>
+          <option ${iv.round==='三面/终面'?'selected':''}>三面/终面</option>
+          <option ${iv.round==='HR面'?'selected':''}>HR面</option>
+          <option ${iv.round==='笔试'?'selected':''}>笔试</option>
+          <option ${iv.round==='测评'?'selected':''}>测评</option>
+        </select>
+        <input type="text" placeholder="面试官/形式" value="${(iv.interviewer||'').replace(/"/g,'&quot;')}" onchange="updateInterview(${i},'interviewer',this.value)" style="flex:1">
+      </div>
+      <textarea rows="2" placeholder="被问到的问题..." onchange="updateInterview(${i},'questions',this.value)">${(iv.questions||'').replace(/</g,'&lt;')}</textarea>
+      <div style="height:6px"></div>
+      <textarea rows="2" placeholder="自我评价/感受..." onchange="updateInterview(${i},'selfEval',this.value)">${(iv.selfEval||'').replace(/</g,'&lt;')}</textarea>
+      <div class="iv-actions"><button class="btn-del-sm" onclick="deleteInterview(${i})">删除</button></div>
+    </div>
+  `).join('');
+}
+function addInterviewItem() {
+  const r=records.find(x=>x.id===editingId); if(!r) return;
+  if(!r.interviews) r.interviews=[];
+  r.interviews.push({date:today(), round:'一面', interviewer:'', questions:'', selfEval:''});
+  saveAllData(); renderInterviews();
+}
+function updateInterview(idx, field, value) {
+  const r=records.find(x=>x.id===editingId); if(!r) return;
+  r.interviews[idx][field]=value; saveAllData();
+}
+function deleteInterview(idx) {
+  const r=records.find(x=>x.id===editingId); if(!r) return;
+  r.interviews.splice(idx,1); saveAllData(); renderInterviews();
 }
 
 function openModal(id) {
@@ -748,328 +1194,1524 @@ function openModal(id) {
   populateSelects();
   document.getElementById('modalTitle').textContent = id?'编辑投递':'新增投递';
   document.getElementById('historySection').style.display = id?'block':'none';
-  if(id) { const r=records.find(x=>x.id===id); if(r) {
-    document.getElementById('f_company').value=r.company||''; document.getElementById('f_position').value=r.position||'';
-    document.getElementById('f_channel').value=getAllChannels().includes(r.channel)?r.channel:'其他';
-    document.getElementById('f_batch').value=getAllBatches().includes(r.batch)?r.batch:'校招';
-    document.getElementById('f_date').value=r.date||today();
-    document.getElementById('f_status').value=getAllStatuses().includes(r.status)?r.status:'已投递';
-    document.getElementById('f_salary').value=r.salary||''; document.getElementById('f_location').value=r.location||'';
-    document.getElementById('f_applyUrl').value=r.applyUrl||''; document.getElementById('f_note').value=r.note||'';
-    renderHistory();
-  }} else {
-    ['f_company','f_position','f_salary','f_location','f_applyUrl','f_note'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('f_channel').value='官网'; document.getElementById('f_batch').value='校招';
-    document.getElementById('f_date').value=today(); document.getElementById('f_status').value='已投递';
+  document.getElementById('interviewSection').style.display = id?'block':'none';
+  if(id) {
+    const r=records.find(x=>x.id===id); if(r) {
+      document.getElementById('f_company').value=r.company||'';
+      document.getElementById('f_position').value=r.position||'';
+      document.getElementById('f_industry').value=getAllIndustries().includes(r.industry)?r.industry:'其他';
+      document.getElementById('f_channel').value=getAllChannels().includes(r.channel)?r.channel:'其他';
+      document.getElementById('f_batch').value=getAllBatches().includes(r.batch)?r.batch:'校招';
+      document.getElementById('f_date').value=r.date||today();
+      document.getElementById('f_status').value=getAllStatuses().includes(r.status)?r.status:'已投递';
+      document.getElementById('f_salary').value=r.salary||'';
+      document.getElementById('f_location').value=r.location||'';
+      document.getElementById('f_applyUrl').value=r.applyUrl||'';
+      document.getElementById('f_note').value=r.note||'';
+      document.getElementById('f_jobDescription').value=r.jobDescription||'';
+      const ne = r.nextEvent || {title:'',date:'',time:'',note:''};
+      document.getElementById('f_ne_title').value=ne.title||'';
+      document.getElementById('f_ne_date').value=ne.date||'';
+      document.getElementById('f_ne_time').value=ne.time||'';
+      document.getElementById('f_ne_note').value=ne.note||'';
+      renderEventHistory(r);
+      renderHistory(); renderInterviews();
+    }
+  } else {
+    ['f_company','f_position','f_salary','f_location','f_applyUrl','f_note','f_jobDescription','f_ne_title','f_ne_date','f_ne_time','f_ne_note'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f_industry').value='其他';
+    document.getElementById('f_channel').value='官网';
+    document.getElementById('f_batch').value='校招';
+    document.getElementById('f_date').value=today();
+    document.getElementById('f_status').value='已投递';
   }
   document.getElementById('modalOverlay').classList.add('active');
 }
-
 function closeModal() {
-  ['channel','batch','status'].forEach(cancelInlineAdd);
+  ['channel','batch','status','industry'].forEach(cancelInlineAdd);
   document.getElementById('modalOverlay').classList.remove('active'); editingId=null;
 }
 
 function addCustomOption(type) {
   const input = document.getElementById('new'+type.charAt(0).toUpperCase()+type.slice(1)+'Opt');
-  const val = input.value.trim();
-  if (!val) return;
-  const all = type==='channel'?getAllChannels():type==='batch'?getAllBatches():getAllStatuses();
-  if (all.includes(val)) { alert('该选项已存在'); return; }
-  allOptions[type].push(val);
-  customOptions[type].push(val);
-  saveConfig();
-  input.value = '';
-  renderSettings();
-  populateSelects();
+  const val = input.value.trim(); if(!val) return;
+  const all = type==='channel'?getAllChannels():type==='batch'?getAllBatches():type==='industry'?getAllIndustries():getAllStatuses();
+  if(all.includes(val)) { alert('该选项已存在'); return; }
+  allOptions[type].push(val); customOptions[type].push(val); saveConfig(); input.value=''; renderSettings(); populateSelects();
 }
-
 function removeOption(type, val) {
-  if (!confirm(`确定删除选项"${val}"吗？\n已使用该选项的记录将保留原值，但下拉框不再可选。`)) return;
-  allOptions[type] = allOptions[type].filter(o => o !== val);
-  customOptions[type] = customOptions[type].filter(o => o !== val);
-  if (optionColors[type]) delete optionColors[type][val];
-  saveConfig();
-  renderSettings();
-  populateSelects();
+  if(!confirm(`确定删除选项"${val}"吗？\n已使用该选项的记录将保留原值，但下拉框不再可选。`)) return;
+  allOptions[type]=allOptions[type].filter(o=>o!==val);
+  customOptions[type]=customOptions[type].filter(o=>o!==val);
+  if(optionColors[type]) delete optionColors[type][val];
+  saveConfig(); renderSettings(); populateSelects();
 }
-
 function reorderOption(type, fromIndex, toIndex) {
-  const arr = allOptions[type];
-  if (fromIndex < 0 || fromIndex >= arr.length || toIndex < 0 || toIndex >= arr.length) return;
-  const [item] = arr.splice(fromIndex, 1);
-  arr.splice(toIndex, 0, item);
-  saveConfig();
-  renderSettings();
-  populateSelects();
+  const arr=allOptions[type];
+  if(fromIndex<0||fromIndex>=arr.length||toIndex<0||toIndex>=arr.length) return;
+  const [item]=arr.splice(fromIndex,1); arr.splice(toIndex,0,item);
+  saveConfig(); renderSettings(); populateSelects();
 }
-
 function setOptionColor(type, val, color) {
-  if (!optionColors[type]) optionColors[type] = {};
-  optionColors[type][val] = color;
-  saveConfig();
-  renderTable();
-  renderSettings();
+  if(!optionColors[type]) optionColors[type]={};
+  optionColors[type][val]=color; saveConfig(); renderTable(); renderSettings();
 }
-
 function renderBorderStyleGrid() {
-  const grid = document.getElementById('borderStyleGrid');
-  grid.innerHTML = BORDER_STYLES.map(bs => {
-    const active = (settings.borderStyle || 'none') === bs.id;
-    let previewStyle = 'background:#dbeafe;color:#1d4ed8;';
-    if (bs.id === 'capsule') previewStyle += 'border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;padding:4px 14px;';
-    if (bs.id === 'soft') previewStyle += 'border:none;border-radius:10px;padding:4px 12px;';
-    if (bs.id === 'card') previewStyle += 'border:1px solid rgba(0,0,0,0.18);border-radius:4px;padding:3px 10px;';
-    if (bs.id === 'solid') previewStyle += 'border:none;border-radius:20px;padding:5px 16px;font-weight:600;background:#2563eb;color:#fff;';
-    return `<div class="border-style-card ${active?'active':''}" onclick="setBorderStyle('${bs.id}')"><span class="bs-preview" style="${previewStyle}">示例</span><div class="bs-name">${bs.name}<br><span style="font-size:10px;color:#9ca3af">${bs.desc}</span></div></div>`;
+  const grid=document.getElementById('borderStyleGrid');
+  grid.innerHTML=BORDER_STYLES.map(bs=>{
+    const active=(settings.borderStyle||'none')===bs.id;
+    let previewStyle='background:#dbeafe;color:#1d4ed8;';
+    if(bs.id==='capsule') previewStyle+='border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;padding:4px 14px;';
+    if(bs.id==='soft') previewStyle+='border:none;border-radius:10px;padding:4px 12px;';
+    if(bs.id==='card') previewStyle+='border:1px solid rgba(0,0,0,0.18);border-radius:4px;padding:3px 10px;';
+    if(bs.id==='solid') previewStyle+='border:none;border-radius:20px;padding:5px 16px;font-weight:600;background:#2563eb;color:#fff;';
+    return `<div class="border-style-card ${active?'active':''}" onclick="setBorderStyle('${bs.id}')"><span class="bs-preview" style="${previewStyle}">示例</span><div class="bs-name">${bs.name}<br><span style="font-size:10px;color:var(--text3)">${bs.desc}</span></div></div>`;
   }).join('');
 }
-
-function setBorderStyle(id) {
-  settings.borderStyle = id;
-  saveConfig();
-  applyBorderStyle();
-  renderBorderStyleGrid();
-}
-
+function setBorderStyle(id) { settings.borderStyle=id; saveConfig(); applyBorderStyle(); renderBorderStyleGrid(); }
 function renderOptColorGrid(type, gridId) {
-  const all = type==='channel'?getAllChannels():type==='batch'?getAllBatches():getAllStatuses();
-  const grid = document.getElementById(gridId);
-  grid.innerHTML = all.map((val, idx) => {
-    const bg = getOptColor(type, val);
-    const custom = isCustom(type, val);
+  const all=type==='channel'?getAllChannels():type==='batch'?getAllBatches():type==='industry'?getAllIndustries():getAllStatuses();
+  const grid=document.getElementById(gridId);
+  grid.innerHTML=all.map((val,idx)=>{
+    const bg=getOptColor(type,val);
+    const custom=isCustom(type,val);
     return `<div class="opt-color-item drag-item" draggable="true" data-type="${type}" data-index="${idx}" ondragstart="onDragStart(event,'${type}',${idx})" ondragover="onDragOver(event)" ondrop="onDrop(event,'${type}',${idx})" ondragend="onDragEnd(event)" ondragleave="onDragLeave(event)">
-      <span style="cursor:grab;color:#9ca3af;margin-right:4px;font-size:12px" title="拖动排序">⋮⋮</span>
+      <span style="cursor:grab;color:var(--text3);margin-right:4px;font-size:12px" title="拖动排序">⋮⋮</span>
       <div class="color-preview" style="background:${bg}" onclick="pickColor('${type}','${val.replace(/'/g,"\\'")}')" title="点击修改颜色"></div>
       <span class="opt-name">${val}${custom?' <span style="color:#f59e0b;font-size:10px">自定义</span>':''}</span>
       <button class="del-btn" onclick="removeOption('${type}','${val.replace(/'/g,"\\'")}')" title="删除">×</button>
     </div>`;
   }).join('');
 }
-
-let dragState = {type:null, fromIndex:null};
-function onDragStart(e, type, index) {
-  dragState = {type, fromIndex:index};
-  e.currentTarget.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-}
-function onDragOver(e) {
-  e.preventDefault();
-  e.currentTarget.classList.add('drag-over');
-}
-function onDragLeave(e) {
-  e.currentTarget.classList.remove('drag-over');
-}
-function onDrop(e, type, toIndex) {
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  if (dragState.type === type && dragState.fromIndex !== null && dragState.fromIndex !== toIndex) {
-    reorderOption(type, dragState.fromIndex, toIndex);
-  }
-}
-function onDragEnd(e) {
-  e.currentTarget.classList.remove('dragging');
-  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-  dragState = {type:null, fromIndex:null};
-}
-
-function pickColor(type, val) {
-  const current = getOptColor(type, val);
-  const input = document.createElement('input');
-  input.type = 'color';
-  input.value = current;
-  input.style.position = 'fixed';
-  input.style.opacity = '0';
-  document.body.appendChild(input);
-  input.onchange = () => { setOptionColor(type, val, input.value); document.body.removeChild(input); };
-  input.oncancel = () => { document.body.removeChild(input); };
-  input.click();
+let dragState={type:null,fromIndex:null};
+function onDragStart(e,type,index){dragState={type,fromIndex:index};e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function onDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function onDragLeave(e){e.currentTarget.classList.remove('drag-over');}
+function onDrop(e,type,toIndex){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(dragState.type===type&&dragState.fromIndex!==null&&dragState.fromIndex!==toIndex)reorderOption(type,dragState.fromIndex,toIndex);}
+function onDragEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'));dragState={type:null,fromIndex:null};}
+function pickColor(type,val) {
+  const current=getOptColor(type,val);
+  const input=document.createElement('input'); input.type='color'; input.value=current;
+  input.style.position='fixed'; input.style.opacity='0'; document.body.appendChild(input);
+  input.onchange=()=>{setOptionColor(type,val,input.value);document.body.removeChild(input);};
+  input.oncancel=()=>{document.body.removeChild(input);}; input.click();
 }
 
 function renderSettings() {
-  document.getElementById('currentDataPath').textContent = DATA_FILE;
-  document.getElementById('newDataPath').value = settings.dataPath || '';
-  document.getElementById('fontSizeSlider').value = settings.fontSize || 14;
-  document.getElementById('fontSizeValue').textContent = (settings.fontSize || 14) + 'px';
-  document.getElementById('fontEnSelect').innerHTML = EN_FONTS.map(f => `<option value="${f.id}" ${settings.fontEn===f.id?'selected':''}>${f.name}</option>`).join('');
-  document.getElementById('fontCnSelect').innerHTML = CN_FONTS.map(f => `<option value="${f.id}" ${settings.fontCn===f.id?'selected':''}>${f.name}</option>`).join('');
+  document.getElementById('currentDataPath').textContent=DATA_FILE;
+  document.getElementById('newDataPath').value=settings.dataPath||'';
+  document.getElementById('fontSizeSlider').value=settings.fontSize||13;
+  document.getElementById('fontSizeValue').textContent=(settings.fontSize||13)+'px';
+  document.getElementById('darkModeSwitch').checked=settings.darkMode||false;
+  document.getElementById('fontEnSelect').innerHTML=EN_FONTS.map(f=>`<option value="${f.id}" ${settings.fontEn===f.id?'selected':''}>${f.name}</option>`).join('');
+  document.getElementById('fontCnSelect').innerHTML=CN_FONTS.map(f=>`<option value="${f.id}" ${settings.fontCn===f.id?'selected':''}>${f.name}</option>`).join('');
   renderBorderStyleGrid();
-  renderOptColorGrid('channel', 'channelColorGrid');
-  renderOptColorGrid('batch', 'batchColorGrid');
-  renderOptColorGrid('status', 'statusColorGrid');
+  renderOptColorGrid('channel','channelColorGrid');
+  renderOptColorGrid('batch','batchColorGrid');
+  renderOptColorGrid('status','statusColorGrid');
+  renderOptColorGrid('industry','industryColorGrid');
 }
-
 function changeDataPath() {
-  let newPath = document.getElementById('newDataPath').value.trim();
-  if (!newPath) { alert('请输入路径'); return; }
+  let newPath=document.getElementById('newDataPath').value.trim(); if(!newPath){alert('请输入路径');return;}
   try {
-    // 去除两端的引号
-    newPath = newPath.replace(/^['"]|['"]$/g, '');
-    // 如果用户输入的是完整文件路径（包含 .json），自动提取目录
-    if (newPath.toLowerCase().endsWith('.json')) {
-      newPath = path.dirname(newPath);
-    }
-    // 统一路径分隔符
-    newPath = newPath.replace(/\//g, '\\');
-    if (!fs.existsSync(newPath)) fs.mkdirSync(newPath, { recursive: true });
-    const newDataFile = path.join(newPath, 'job_data.json');
-    if (fs.existsSync(DATA_FILE) && DATA_FILE !== newDataFile) {
-      fs.copyFileSync(DATA_FILE, newDataFile);
-    }
-    settings.dataPath = newPath;
-    DATA_FILE = newDataFile;
-    saveConfig();
-    alert('存储位置已修改！\n新路径：' + newDataFile + '\n数据已迁移，重启应用后生效。');
-    renderSettings();
-  } catch(e) { alert('修改失败: ' + e.message); }
+    newPath=newPath.replace(/^['"]|['"]$/g,'');
+    if(newPath.toLowerCase().endsWith('.json')) newPath=path.dirname(newPath);
+    newPath=newPath.replace(/\//g,'\\');
+    if(!fs.existsSync(newPath)) fs.mkdirSync(newPath,{recursive:true});
+    const newDataFile=path.join(newPath,'job_data.json');
+    if(fs.existsSync(DATA_FILE)&&DATA_FILE!==newDataFile) fs.copyFileSync(DATA_FILE,newDataFile);
+    settings.dataPath=newPath; DATA_FILE=newDataFile; saveConfig();
+    alert('存储位置已修改！\n新路径：'+newDataFile+'\n数据已迁移，重启应用后生效。'); renderSettings();
+  } catch(e){alert('修改失败: '+e.message);}
 }
-
-function openDataFolder() {
-  try { shell.openPath(path.dirname(DATA_FILE)); } catch(e) { alert('打开失败: ' + e.message); }
-}
-
+function openDataFolder() { try{shell.openPath(path.dirname(DATA_FILE));}catch(e){alert('打开失败: '+e.message);} }
 function clearAllData() {
-  if (!confirm('确定要清空所有投递记录吗？此操作不可恢复！')) return;
-  if (!confirm('再次确认：真的要删除全部 ' + records.length + ' 条记录吗？')) return;
-  records = [];
-  filters = { company: [], channel: [], batch: [], status: [], location: [] };
-  saveAllData();
-  renderTable();
-  renderStats();
-  alert('数据已清空');
+  if(!confirm('确定要清空所有投递记录吗？此操作不可恢复！')) return;
+  if(!confirm('再次确认：真的要删除全部 '+records.length+' 条记录吗？')) return;
+  records=[]; filters={company:[],industry:[],channel:[],batch:[],status:[],location:[]}; selectedIds.clear();
+  saveAllData(); renderTable(); renderStats(); renderUpcoming(); alert('数据已清空');
 }
 
 function saveRecord() {
   try {
     const company=document.getElementById('f_company').value.trim(), position=document.getElementById('f_position').value.trim();
-    if(!company||!position) { alert('请填写公司名称和岗位名称'); return; }
-    const data={company,position,channel:document.getElementById('f_channel').value,batch:document.getElementById('f_batch').value,date:document.getElementById('f_date').value,status:document.getElementById('f_status').value,salary:document.getElementById('f_salary').value.trim(),location:document.getElementById('f_location').value.trim(),applyUrl:document.getElementById('f_applyUrl').value.trim(),note:document.getElementById('f_note').value.trim()};
-    if(editingId) { const r=records.find(x=>x.id===editingId); if(r){const old=r.status;Object.assign(r,data);if(old!==data.status)r.statusHistory.push({status:data.status,date:today(),note:''});} }
-    else { data.id='rec_'+Date.now()+'_'+Math.random().toString(36).slice(2,7); data.statusHistory=[{status:data.status,date:data.date,note:''}]; records.push(data); }
-    saveAllData(); renderTable(); renderStats(); closeModal();
-  } catch(e) { console.error('保存出错:', e); alert('保存出错: ' + e.message); }
+    if(!company||!position){alert('请填写公司名称和岗位名称');return;}
+    // 重复检测
+    const dup = checkDuplicate(company, position, editingId);
+    if (dup && !confirm(`检测到重复投递：\n公司：${company}\n岗位：${position}\n当前状态：${dup.status}\n\n是否仍要保存？`)) return;
+    const data={
+      company, position,
+      industry: document.getElementById('f_industry').value,
+      channel: document.getElementById('f_channel').value,
+      batch: document.getElementById('f_batch').value,
+      date: document.getElementById('f_date').value,
+      status: document.getElementById('f_status').value,
+      salary: document.getElementById('f_salary').value.trim(),
+      location: document.getElementById('f_location').value.trim(),
+      applyUrl: document.getElementById('f_applyUrl').value.trim(),
+      note: document.getElementById('f_note').value.trim(),
+      jobDescription: document.getElementById('f_jobDescription').value.trim(),
+      nextEvent: {
+        title: document.getElementById('f_ne_title').value.trim(),
+        date: document.getElementById('f_ne_date').value,
+        time: document.getElementById('f_ne_time').value,
+        note: document.getElementById('f_ne_note').value.trim()
+      }
+    };
+    if(editingId) {
+      const r=records.find(x=>x.id===editingId);
+      if(r){const old=r.status;Object.assign(r,data);if(old!==data.status)r.statusHistory.push({status:data.status,date:today(),note:''});}
+    } else {
+      data.id='rec_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+      data.statusHistory=[{status:data.status,date:data.date,note:''}];
+      data.interviews=[];
+      records.push(data);
+    }
+    saveAllData(); renderTable(); renderStats(); renderUpcoming(); closeModal();
+  } catch(e){console.error('保存出错:',e);alert('保存出错: '+e.message);}
+}
+function deleteRecord(id) {
+  if(!confirm('确定删除这条投递记录吗？删除后可在回收站恢复（保留30天）'))return;
+  const r = records.find(x=>x.id===id);
+  if(r) {
+    r.deletedAt = Date.now();
+    deletedRecords.push(r);
+  }
+  records=records.filter(r=>r.id!==id); selectedIds.delete(id);
+  saveAllData(); renderTable(); renderStats(); renderUpcoming();
 }
 
-function deleteRecord(id) { if(!confirm('确定删除这条投递记录吗？'))return; records=records.filter(r=>r.id!==id); saveAllData(); renderTable(); renderStats(); }
+// 回收站功能
+function openRecycleBin() {
+  document.getElementById('recycleBinModal').style.display = 'flex';
+  renderRecycleBin();
+}
+function closeRecycleBin() {
+  document.getElementById('recycleBinModal').style.display = 'none';
+}
+function renderRecycleBin() {
+  const list = document.getElementById('recycleBinList');
+  if (deletedRecords.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">回收站为空</div>';
+    return;
+  }
+  const now = Date.now();
+  list.innerHTML = deletedRecords.map(r => {
+    const daysLeft = Math.ceil((30*24*3600*1000 - (now - (r.deletedAt || now))) / (24*3600*1000));
+    const delDate = r.deletedAt ? new Date(r.deletedAt).toLocaleDateString() : '未知';
+    return `<div style="display:flex;align-items:center;padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;background:var(--card-bg)">
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px">${r.company} - ${r.position}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px">状态：${r.status} | 删除时间：${delDate} | 剩余 ${daysLeft} 天自动清理</div>
+      </div>
+      <button class="btn-secondary" style="padding:6px 12px;font-size:12px;margin-right:8px" onclick="restoreRecord('${r.id}')">恢复</button>
+      <button class="btn-danger" style="padding:6px 12px;font-size:12px" onclick="permanentDelete('${r.id}')">永久删除</button>
+    </div>`;
+  }).join('');
+}
+function restoreRecord(id) {
+  const idx = deletedRecords.findIndex(r => r.id === id);
+  if (idx >= 0) {
+    const r = deletedRecords[idx];
+    delete r.deletedAt;
+    records.push(r);
+    deletedRecords.splice(idx, 1);
+    saveAllData(); renderTable(); renderStats(); renderUpcoming(); renderRecycleBin();
+  }
+}
+function permanentDelete(id) {
+  if (!confirm('确定永久删除这条记录吗？无法恢复！')) return;
+  deletedRecords = deletedRecords.filter(r => r.id !== id);
+  saveAllData(); renderRecycleBin();
+}
+function emptyRecycleBin() {
+  if (!confirm('确定清空回收站吗？所有记录将永久删除，无法恢复！')) return;
+  deletedRecords = [];
+  saveAllData(); renderRecycleBin();
+}
 
+function renderEventHistory(r) {
+  const section = document.getElementById('eventHistorySection');
+  const list = document.getElementById('eventHistoryList');
+  if (!r.eventHistory || r.eventHistory.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  list.innerHTML = r.eventHistory.map((ev, idx) => {
+    const completedDate = ev.completedAt ? new Date(ev.completedAt).toLocaleDateString() : '';
+    const timeStr = ev.time ? ' ' + ev.time : '';
+    return `<div style="padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;margin-bottom:6px;font-size:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-weight:600;color:#166534">✓ ${ev.title} (${ev.date}${timeStr})</span>
+        <span style="color:#6b7280;font-size:11px">完成于 ${completedDate}</span>
+      </div>
+      ${ev.note ? `<div style="color:#6b7280;margin-top:4px">${ev.note}</div>` : ''}
+    </div>`;
+  }).join('');
+}
 function renderHistory() {
   const r=records.find(x=>x.id===editingId); if(!r)return;
   const sorted=[...r.statusHistory].sort((a,b)=>new Date(a.date)-new Date(b.date));
   document.getElementById('historyTimeline').innerHTML=sorted.map((h,i)=>`<div class="timeline-item ${i===sorted.length-1?'current':''}"><div class="history-edit"><select onchange="updateHistory(${i},'status',this.value)">${getAllStatuses().map(s=>`<option ${s===h.status?'selected':''}>${s}</option>`).join('')}</select><input type="date" value="${h.date}" onchange="updateHistory(${i},'date',this.value)"><input class="note-input" type="text" value="${(h.note||'').replace(/"/g,'&quot;')}" placeholder="备注" onchange="updateHistory(${i},'note',this.value)"><div class="history-actions"><button class="btn-del-sm" onclick="deleteHistory(${i})">删除</button></div></div></div>`).join('');
 }
-
 function updateHistory(idx,field,value) {
   const r=records.find(x=>x.id===editingId); if(!r)return;
   const sorted=[...r.statusHistory].sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const oi=r.statusHistory.indexOf(sorted[idx]); if(oi>=0){r.statusHistory[oi][field]=value;const latest=[...r.statusHistory].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];r.status=latest.status;document.getElementById('f_status').value=getAllStatuses().includes(r.status)?r.status:'已投递';saveAllData();}
+  const oi=r.statusHistory.indexOf(sorted[idx]);
+  if(oi>=0){r.statusHistory[oi][field]=value;const latest=[...r.statusHistory].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];r.status=latest.status;document.getElementById('f_status').value=getAllStatuses().includes(r.status)?r.status:'已投递';saveAllData();}
 }
-
 function deleteHistory(idx) {
-  const r=records.find(x=>x.id===editingId); if(!r)return; if(r.statusHistory.length<=1){alert('至少保留一条状态记录');return;}
-  const sorted=[...r.statusHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)); const oi=r.statusHistory.indexOf(sorted[idx]);
+  const r=records.find(x=>x.id===editingId); if(!r)return;
+  if(r.statusHistory.length<=1){alert('至少保留一条状态记录');return;}
+  const sorted=[...r.statusHistory].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const oi=r.statusHistory.indexOf(sorted[idx]);
   if(oi>=0){r.statusHistory.splice(oi,1);const latest=[...r.statusHistory].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];r.status=latest.status;document.getElementById('f_status').value=getAllStatuses().includes(r.status)?r.status:'已投递';saveAllData();renderHistory();}
 }
-
 function addHistoryItem() { const r=records.find(x=>x.id===editingId); if(!r)return; r.statusHistory.push({status:'笔试',date:today(),note:''}); saveAllData(); renderHistory(); }
 
 function getFilteredRecords() {
   const search=document.getElementById('searchInput').value.toLowerCase().trim();
-  const filtered = records.filter(r=>{
+  const filtered=records.filter(r=>{
     if(search){const m=(r.company||'').toLowerCase().includes(search)||(r.position||'').toLowerCase().includes(search)||(r.location||'').toLowerCase().includes(search);if(!m)return false;}
     if(filters.company.length&&!filters.company.includes(r.company))return false;
+    if(filters.industry.length&&!filters.industry.includes(r.industry||'其他'))return false;
     if(filters.channel.length&&!filters.channel.includes(r.channel))return false;
     if(filters.batch.length&&!filters.batch.includes(r.batch))return false;
     if(filters.status.length&&!filters.status.includes(r.status))return false;
     if(filters.location.length&&!filters.location.includes(r.location||'（未填写）'))return false;
     return true;
   });
-  // 按日期排序，日期相同按添加先后（原始索引）排序
   filtered.sort((a,b)=>{
-    const da = new Date(a.date).getTime();
-    const db = new Date(b.date).getTime();
-    if (da !== db) return dateSort === 'desc' ? db - da : da - db;
-    return records.indexOf(a) - records.indexOf(b);
+    const da=new Date(a.date).getTime(), db=new Date(b.date).getTime();
+    if(da!==db) return dateSort==='desc'?db-da:da-db;
+    return records.indexOf(a)-records.indexOf(b);
   });
   return filtered;
 }
+function toggleDateSort() { dateSort=dateSort==='desc'?'asc':'desc'; document.getElementById('dateSortIcon').textContent=dateSort==='desc'?'↓':'↑'; renderTable(); }
 
-function toggleDateSort() {
-  dateSort = dateSort === 'desc' ? 'asc' : 'desc';
-  document.getElementById('dateSortIcon').textContent = dateSort === 'desc' ? '↓' : '↑';
+// 批量操作
+function toggleSelect(id) {
+  if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+  updateBatchBar();
+}
+function toggleSelectAll() {
+  const checked = document.getElementById('selectAll').checked;
+  const filtered = getFilteredRecords();
+  if(checked) filtered.forEach(r=>selectedIds.add(r.id));
+  else filtered.forEach(r=>selectedIds.delete(r.id));
   renderTable();
+}
+function clearSelection() { selectedIds.clear(); renderTable(); }
+function updateBatchBar() {
+  const bar = document.getElementById('batchBar');
+  const info = document.getElementById('batchInfo');
+  if(selectedIds.size>0) { bar.classList.add('show'); info.textContent=`已选 ${selectedIds.size} 条`; }
+  else bar.classList.remove('show');
+}
+function batchSetStatus() {
+  const status = document.getElementById('batchStatusSelect').value;
+  if(!status) { alert('请选择状态'); return; }
+  if(!confirm(`确定将选中的 ${selectedIds.size} 条记录状态改为"${status}"吗？`)) return;
+  records.forEach(r => {
+    if(selectedIds.has(r.id)) {
+      if(r.status !== status) r.statusHistory.push({status, date:today(), note:'批量修改'});
+      r.status = status;
+    }
+  });
+  saveAllData(); selectedIds.clear(); renderTable(); renderStats(); renderUpcoming();
+}
+function batchDelete() {
+  if(!confirm(`确定删除选中的 ${selectedIds.size} 条记录吗？此操作不可恢复！`)) return;
+  records = records.filter(r=>!selectedIds.has(r.id));
+  selectedIds.clear(); saveAllData(); renderTable(); renderStats(); renderUpcoming();
 }
 
 function renderTable() {
-  const filtered=getFilteredRecords(); const tbody=document.getElementById('recordsBody'); const empty=document.getElementById('emptyState');
+  const filtered=getFilteredRecords();
+  const tbody=document.getElementById('recordsBody');
+  const empty=document.getElementById('emptyState');
   document.getElementById('recordCount').textContent=`共 ${filtered.length} 条记录`;
-  if(filtered.length===0){tbody.innerHTML='';empty.style.display='block';return;}
+  // 更新全选框状态
+  const selectAll = document.getElementById('selectAll');
+  if(filtered.length>0 && filtered.every(r=>selectedIds.has(r.id))) selectAll.checked=true;
+  else selectAll.checked=false;
+  if(filtered.length===0){tbody.innerHTML='';empty.style.display='block';updateBatchBar();return;}
   empty.style.display='none';
   tbody.innerHTML=filtered.map(r=>{
-    const chStyle = getBadgeStyle('channel', r.channel);
-    const baStyle = getBadgeStyle('batch', r.batch);
-    const stStyle = getBadgeStyle('status', r.status);
+    const chStyle=getBadgeStyle('channel',r.channel);
+    const baStyle=getBadgeStyle('batch',r.batch);
+    const stStyle=getBadgeStyle('status',r.status);
     const ch=r.applyUrl?`<span class="badge" style="${chStyle}"><a href="${r.applyUrl}" target="_blank">${r.channel}</a></span>`:`<span class="badge" style="${chStyle}">${r.channel}</span>`;
     const co=r.applyUrl?`${r.company} <a href="${r.applyUrl}" target="_blank" style="color:#3b82f6;text-decoration:none;margin-left:4px" title="打开投递链接">↗</a>`:r.company;
-    const rowClass = r.status === '已挂' ? 'row-rejected' : '';
-    return `<tr class="${rowClass}"><td title="${r.company}">${co}</td><td title="${r.position}">${r.position}</td><td>${ch}</td><td><span class="badge" style="${baStyle}">${r.batch}</span></td><td>${r.date}</td><td><span class="badge" style="${stStyle}">${r.status}</span></td><td>${r.salary||'-'}</td><td title="${r.location||''}">${r.location||'-'}</td><td><div class="action-btns"><button class="icon-btn" onclick="openModal('${r.id}')" title="编辑">✏️</button><button class="icon-btn delete" onclick="deleteRecord('${r.id}')" title="删除">🗑️</button></div></td></tr>`;
+    const rowClass = r.status==='已挂'?'row-rejected':'';
+    const selClass = selectedIds.has(r.id)?'row-selected':'';
+    const checked = selectedIds.has(r.id)?'checked':'';
+    const neBadge = (r.nextEvent&&r.nextEvent.title) ? `<div style="margin-top:4px;font-size:11px;color:#f59e0b">⏰ ${r.nextEvent.date||''} ${r.nextEvent.time||''}</div>` : '';
+    return `<tr class="${rowClass} ${selClass}">
+      <td data-col="select"><input type="checkbox" class="row-checkbox" ${checked} onchange="toggleSelect('${r.id}')"></td>
+      <td data-col="company" title="${r.company}">${co}</td>
+      <td data-col="position" title="${r.position}">${r.position}</td>
+      <td data-col="industry"><span class="badge" style="${getBadgeStyle('industry',r.industry||'其他')}">${r.industry||'其他'}</span></td>
+      <td data-col="channel">${ch}</td>
+      <td data-col="batch"><span class="badge" style="${baStyle}">${r.batch}</span></td>
+      <td data-col="date">${r.date}</td>
+      <td data-col="status"><span class="badge" style="${stStyle}">${r.status}</span>${neBadge}</td>
+      <td data-col="salary">${r.salary||'-'}</td>
+      <td data-col="location" title="${r.location||''}">${r.location||'-'}</td>
+      <td data-col="actions"><div class="action-btns">${settings.aiEnabled!==false?`<button class="icon-btn" onclick="setAIContext('${r.id}')" title="AI分析">🤖</button>`:''}<button class="icon-btn" onclick="openModal('${r.id}')" title="编辑">✏️</button><button class="icon-btn delete" onclick="deleteRecord('${r.id}')" title="删除">🗑️</button></div></td>
+    </tr>`;
   }).join('');
-  updateFilterIcons();
+  updateFilterIcons(); updateBatchBar(); applyColVisibility();
 }
 
 function setupFilterDropdown() {
   document.querySelectorAll('th.filterable').forEach(th=>{
-    th.addEventListener('click', (e) => {
-      if (e.target.classList.contains('col-resizer')) return;
+    th.addEventListener('click',(e)=>{
+      if(e.target.classList.contains('col-resizer')||e.target.classList.contains('row-checkbox'))return;
       e.stopPropagation(); currentFilterCol=th.dataset.col; showFilterDropdown(th);
     });
   });
-  document.addEventListener('click',(e)=>{if(!e.target.closest('.filter-dropdown')&&!e.target.closest('th.filterable'))document.getElementById('filterDropdown').classList.remove('show');});
+  // 表头右键菜单
+  document.querySelectorAll('thead th').forEach(th=>{
+    th.addEventListener('contextmenu', showColMenu);
+  });
+  document.addEventListener('click',(e)=>{
+    if(!e.target.closest('.filter-dropdown')&&!e.target.closest('th.filterable'))document.getElementById('filterDropdown').classList.remove('show');
+    if(!e.target.closest('.col-menu')) hideColMenu();
+  });
 }
-
 function getFilterOptions(col) {
   if(col==='channel')return getAllChannels();
   if(col==='batch')return getAllBatches();
   if(col==='status')return getAllStatuses();
+  if(col==='industry')return getAllIndustries();
   if(col==='company')return[...new Set(records.map(r=>r.company).filter(Boolean))].sort();
   if(col==='location')return[...new Set(records.map(r=>r.location||'（未填写）'))].sort();
-  return[];
 }
-
 function showFilterDropdown(th) {
   const dd=document.getElementById('filterDropdown'); const col=currentFilterCol; const options=getFilterOptions(col); const selected=filters[col]||[];
   const allSel=selected.length===0||selected.length===options.length;
   dd.innerHTML=`<div class="filter-option"><input type="checkbox" id="fAll" ${allSel?'checked':''} onchange="toggleAllFilters(this.checked)"><label for="fAll" style="cursor:pointer;font-weight:600">全选</label></div>`+options.map(opt=>`<div class="filter-option"><input type="checkbox" id="fo_${opt}" ${selected.includes(opt)?'checked':''} onchange="toggleFilter('${opt.replace(/'/g,"\\'")}',this.checked)"><label for="fo_${opt}" style="cursor:pointer">${opt}</label></div>`).join('');
   const rect=th.getBoundingClientRect(); dd.style.left=rect.left+'px'; dd.style.top=(rect.bottom+window.scrollY)+'px'; dd.style.minWidth=Math.max(rect.width,140)+'px'; dd.classList.add('show');
 }
+function toggleAllFilters(checked){filters[currentFilterCol]=checked?[]:getFilterOptions(currentFilterCol);saveAllData();renderTable();showFilterDropdown(document.querySelector(`th[data-col="${currentFilterCol}"]`));}
+function toggleFilter(opt,checked){const arr=filters[currentFilterCol]||[];if(checked){if(!arr.includes(opt))arr.push(opt);}else{const i=arr.indexOf(opt);if(i>=0)arr.splice(i,1);}filters[currentFilterCol]=arr;saveAllData();renderTable();}
+function updateFilterIcons(){document.querySelectorAll('th.filterable').forEach(th=>{const col=th.dataset.col;th.classList.toggle('filtered',filters[col]&&filters[col].length>0);});}
 
-function toggleAllFilters(checked) { filters[currentFilterCol]=checked?[]:getFilterOptions(currentFilterCol); saveAllData(); renderTable(); showFilterDropdown(document.querySelector(`th[data-col="${currentFilterCol}"]`)); }
-function toggleFilter(opt,checked) { const arr=filters[currentFilterCol]||[]; if(checked){if(!arr.includes(opt))arr.push(opt);}else{const i=arr.indexOf(opt);if(i>=0)arr.splice(i,1);} filters[currentFilterCol]=arr; saveAllData(); renderTable(); }
-function updateFilterIcons() { document.querySelectorAll('th.filterable').forEach(th=>{const col=th.dataset.col;th.classList.toggle('filtered',filters[col]&&filters[col].length>0);}); }
+// 列显示/隐藏右键菜单
+function showColMenu(e) {
+  e.preventDefault();
+  const menu = document.getElementById('colMenu');
+  const list = document.getElementById('colMenuList');
+  list.innerHTML = Object.entries(COL_NAMES).map(([col, name]) => {
+    const checked = !hiddenCols.has(col) ? 'checked' : '';
+    return `<div class="col-menu-item"><input type="checkbox" ${checked} onchange="toggleCol('${col}')"><label style="cursor:pointer;flex:1" onclick="event.preventDefault();toggleCol('${col}')">${name}</label></div>`;
+  }).join('');
+  menu.style.left = e.pageX + 'px';
+  menu.style.top = e.pageY + 'px';
+  menu.classList.add('show');
+}
+function toggleCol(col) {
+  if (hiddenCols.has(col)) hiddenCols.delete(col);
+  else hiddenCols.add(col);
+  saveConfig();
+  applyColVisibility();
+  // 更新菜单复选框状态
+  showColMenu({preventDefault:()=>{}, pageX:parseInt(document.getElementById('colMenu').style.left), pageY:parseInt(document.getElementById('colMenu').style.top)});
+}
+function applyColVisibility() {
+  document.querySelectorAll('th[data-col], td[data-col]').forEach(el => {
+    const col = el.dataset.col;
+    if (hiddenCols.has(col)) el.style.display = 'none';
+    else el.style.display = '';
+  });
+}
+function hideColMenu() { document.getElementById('colMenu').classList.remove('show'); }
+
+// ========== AI 助手功能 ==========
+function toggleAISidebar() {
+  if (!settings.aiEnabled) { alert('请先在设置中启用 AI 助手'); return; }
+  const sidebar = document.getElementById('aiSidebar');
+  const overlay = document.getElementById('aiOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+  if (sidebar.classList.contains('open')) {
+    setTimeout(()=>document.getElementById('aiInput').focus(), 300);
+  } else {
+    window.speechSynthesis?.cancel();
+    if (sttEnabled) stopSTT();
+  }
+}
+
+function switchAITab(tab) {
+  aiCurrentTab = tab;
+  document.querySelectorAll('.ai-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+  renderAIChat();
+  renderQuickActions();
+  updateAIContextDisplay();
+}
+
+function setAIContext(recordId) {
+  aiContextRecordId = recordId;
+  updateAIContextDisplay();
+  if (!document.getElementById('aiSidebar').classList.contains('open')) toggleAISidebar();
+}
+
+function clearAIContext() {
+  aiContextRecordId = null;
+  updateAIContextDisplay();
+}
+
+function updateAIContextDisplay() {
+  const tag = document.getElementById('aiContextTag');
+  if (aiContextRecordId) {
+    const r = records.find(x=>x.id===aiContextRecordId);
+    if (r) tag.textContent = `${r.company} - ${r.position}`;
+    else { aiContextRecordId = null; tag.textContent = '全部数据'; }
+  } else {
+    tag.textContent = '全部数据';
+  }
+}
+
+function onAIProviderChange() {
+  const provider = document.getElementById('aiProviderSelect').value;
+  settings.aiProvider = provider;
+  const cfg = AI_PROVIDERS[provider];
+  document.getElementById('aiApiUrl').value = cfg.url;
+  settings.aiApiUrl = cfg.url;
+  const modelSelect = document.getElementById('aiModelSelect');
+  const customInput = document.getElementById('aiModelCustom');
+  if (cfg.models.length > 0) {
+    modelSelect.style.display = '';
+    customInput.style.display = 'none';
+    modelSelect.innerHTML = cfg.models.map(m=>`<option value="${m}">${m}</option>`).join('');
+    settings.aiModel = cfg.models[0];
+    modelSelect.value = cfg.models[0];
+  } else {
+    modelSelect.style.display = 'none';
+    customInput.style.display = '';
+    customInput.value = settings.aiModel || '';
+  }
+  saveConfig();
+}
+
+function onAIModelChange() {
+  settings.aiModel = document.getElementById('aiModelSelect').value;
+  saveConfig();
+}
+
+function loadAISettings() {
+  document.getElementById('aiEnabledToggle').checked = settings.aiEnabled !== false;
+  document.getElementById('aiConfigArea').style.display = settings.aiEnabled !== false ? '' : 'none';
+  document.getElementById('aiProviderSelect').value = settings.aiProvider || 'deepseek';
+  document.getElementById('aiApiUrl').value = settings.aiApiUrl || AI_PROVIDERS[settings.aiProvider||'deepseek'].url;
+  document.getElementById('aiApiKey').value = settings.aiApiKey || '';
+  document.getElementById('sttProvider').value = settings.sttProvider || 'baidu';
+  document.getElementById('baiduApiKey').value = settings.baiduApiKey || '';
+  document.getElementById('baiduSecretKey').value = settings.baiduSecretKey || '';
+  document.getElementById('baiduConfig').style.display = (settings.sttProvider || 'baidu') === 'baidu' ? '' : 'none';
+  const cfg = AI_PROVIDERS[settings.aiProvider || 'deepseek'];
+  const modelSelect = document.getElementById('aiModelSelect');
+  const customInput = document.getElementById('aiModelCustom');
+  if (cfg.models.length > 0) {
+    modelSelect.style.display = '';
+    customInput.style.display = 'none';
+    modelSelect.innerHTML = cfg.models.map(m=>`<option value="${m}">${m}</option>`).join('');
+    modelSelect.value = settings.aiModel || cfg.models[0];
+    settings.aiModel = modelSelect.value;
+  } else {
+    modelSelect.style.display = 'none';
+    customInput.style.display = '';
+    customInput.value = settings.aiModel || '';
+  }
+  updateAIVisibility();
+}
+
+function toggleAIEnabled(enabled) {
+  settings.aiEnabled = enabled;
+  document.getElementById('aiConfigArea').style.display = enabled ? '' : 'none';
+  saveConfig();
+  updateAIVisibility();
+  if (!enabled) {
+    document.getElementById('aiSidebar').classList.remove('open');
+    document.getElementById('aiOverlay').classList.remove('show');
+  }
+}
+
+function updateAIVisibility() {
+  const aiBtn = document.querySelector('.ai-toggle-btn');
+  if (aiBtn) aiBtn.style.display = settings.aiEnabled !== false ? '' : 'none';
+  renderTable();
+}
+
+function saveResume() {
+  try {
+    const oldFiles = settings.resume?.resumeFiles || [];
+    settings.resume = {
+      name: document.getElementById('resume_name').value,
+      education: document.getElementById('resume_education').value,
+      experience: document.getElementById('resume_experience').value,
+      skills: document.getElementById('resume_skills').value,
+      projects: document.getElementById('resume_projects').value,
+      awards: document.getElementById('resume_awards').value,
+      certificates: document.getElementById('resume_certificates').value,
+      languages: document.getElementById('resume_languages').value,
+      clubs: document.getElementById('resume_clubs').value,
+      jobIntention: document.getElementById('resume_jobIntention').value,
+      links: document.getElementById('resume_links').value,
+      selfEval: document.getElementById('resume_selfEval').value,
+      resumeFiles: oldFiles
+    };
+    saveConfig();
+  } catch(e) {
+    console.error('保存简历档案失败:', e);
+  }
+}
+
+function loadResume() {
+  try {
+    const r = settings.resume || {};
+    document.getElementById('resume_name').value = r.name || '';
+    document.getElementById('resume_education').value = r.education || '';
+    document.getElementById('resume_experience').value = r.experience || '';
+    document.getElementById('resume_skills').value = r.skills || '';
+    document.getElementById('resume_projects').value = r.projects || '';
+    document.getElementById('resume_awards').value = r.awards || '';
+    document.getElementById('resume_certificates').value = r.certificates || '';
+    document.getElementById('resume_languages').value = r.languages || '';
+    document.getElementById('resume_clubs').value = r.clubs || '';
+    document.getElementById('resume_jobIntention').value = r.jobIntention || '';
+    document.getElementById('resume_links').value = r.links || '';
+    document.getElementById('resume_selfEval').value = r.selfEval || '';
+    renderResumeFileList();
+  } catch(e) {
+    console.error('加载简历档案失败:', e);
+  }
+}
+
+// 简历附件上传
+async function handleResumeUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const attachDir = path.join(CONFIG_DIR, 'resume_files');
+    if (!fs.existsSync(attachDir)) fs.mkdirSync(attachDir, { recursive: true });
+    const saveName = Date.now() + '_' + file.name;
+    const savePath = path.join(attachDir, saveName);
+    const arrayBuffer = await file.arrayBuffer();
+    fs.writeFileSync(savePath, Buffer.from(arrayBuffer));
+    const fileInfo = { name: file.name, savedName: saveName, size: file.size, uploadTime: Date.now() };
+    if (!settings.resume) settings.resume = {};
+    if (!settings.resume.resumeFiles) settings.resume.resumeFiles = [];
+    settings.resume.resumeFiles.push(fileInfo);
+    renderResumeFileList();
+    
+    let extractedText = '';
+    let extractError = '';
+    try {
+      const lowerName = file.name.toLowerCase();
+      if (lowerName.endsWith('.txt')) {
+        extractedText = fs.readFileSync(savePath, 'utf-8');
+      } else if (lowerName.endsWith('.pdf')) {
+        const pdfParse = require('pdf-parse');
+        const dataBuffer = fs.readFileSync(savePath);
+        const data = await pdfParse(dataBuffer);
+        extractedText = data.text || '';
+      } else if (lowerName.endsWith('.docx')) {
+        const mammoth = require('mammoth');
+        const result = await mammoth.extractRawText({ path: savePath });
+        extractedText = result.value || '';
+      }
+    } catch(e) {
+      extractError = e.message;
+      console.error('文本提取失败:', e);
+    }
+    
+    if (extractedText && extractedText.trim().length > 5) {
+      smartFillResume(extractedText);
+      saveResume();
+      alert('✅ 简历识别成功！已自动填充各字段，请检查并完善。\n\n识别到 ' + extractedText.length + ' 字。\n\n前300字预览：\n' + extractedText.slice(0, 300) + '...');
+    } else {
+      let msg = '⚠️ 简历上传成功，但未能自动识别文本内容。\n\n';
+      if (extractError) msg += '错误信息：' + extractError + '\n\n';
+      if (file.name.toLowerCase().endsWith('.pdf')) {
+        msg += '可能原因：\n1. PDF是扫描件/图片格式（需要OCR）\n2. PDF有加密或特殊格式\n\n';
+        msg += '建议：手动将简历内容填入下方各字段，或把PDF另存为Word后再上传。';
+      } else {
+        msg += '建议：请手动将简历内容填入下方各字段。';
+      }
+      alert(msg);
+    }
+  } catch(e) {
+    alert('上传失败: ' + e.message);
+  }
+  event.target.value = '';
+}
+
+function smartFillResume(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  const basicInfo = lines.slice(0, 3).join(' ').slice(0, 100);
+  if (!document.getElementById('resume_name').value && basicInfo) {
+    document.getElementById('resume_name').value = basicInfo;
+  }
+  const fillIfEmpty = (id, keywords, endKeywords, maxLen) => {
+    const section = extractResumeSection(text, keywords, endKeywords);
+    if (section && !document.getElementById(id).value) {
+      document.getElementById(id).value = section.slice(0, maxLen);
+    }
+  };
+  fillIfEmpty('resume_education', ['教育背景','教育经历','教育','学历'], ['实习','工作','项目','技能','获奖','证书','语言','社团','自我评价','求职意向'], 500);
+  fillIfEmpty('resume_experience', ['实习经历','工作经历','实习','工作','职业经历'], ['教育','项目','技能','获奖','证书','语言','社团','自我评价','求职意向'], 1000);
+  fillIfEmpty('resume_projects', ['项目经历','项目经验','项目','科研项目'], ['教育','实习','工作','技能','获奖','证书','语言','社团','自我评价','求职意向'], 1000);
+  fillIfEmpty('resume_skills', ['专业技能','技能','技能特长','专业能力','技术栈'], ['教育','实习','工作','项目','获奖','证书','语言','社团','自我评价','求职意向'], 500);
+  fillIfEmpty('resume_awards', ['获奖经历','荣誉奖项','奖项','获奖','荣誉'], ['教育','实习','工作','项目','技能','证书','语言','社团','自我评价','求职意向'], 500);
+  fillIfEmpty('resume_certificates', ['证书','资格证书','专业证书','认证'], ['教育','实习','工作','项目','技能','获奖','语言','社团','自我评价','求职意向'], 300);
+  fillIfEmpty('resume_languages', ['语言能力','语言','英语','外语'], ['教育','实习','工作','项目','技能','获奖','证书','社团','自我评价','求职意向'], 300);
+  fillIfEmpty('resume_clubs', ['社团','学生工作','学生会','校园经历','社会实践','志愿者'], ['教育','实习','工作','项目','技能','获奖','证书','语言','自我评价','求职意向'], 500);
+  fillIfEmpty('resume_selfEval', ['自我评价','个人评价','自我描述','个人简介','关于我'], ['教育','实习','工作','项目','技能','获奖','证书','语言','社团','求职意向'], 500);
+}
+
+function extractResumeSection(text, startKeywords, endKeywords) {
+  const lines = text.split('\n');
+  let startIdx = -1, endIdx = lines.length;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (startIdx === -1) {
+      if (startKeywords.some(k => line.includes(k) && line.length < 20)) startIdx = i + 1;
+    } else {
+      if (endKeywords.some(k => line.includes(k) && line.length < 20)) { endIdx = i; break; }
+    }
+  }
+  if (startIdx === -1) return '';
+  return lines.slice(startIdx, endIdx).join('\n').trim();
+}
+
+function renderResumeFileList() {
+  const listEl = document.getElementById('resumeFileList');
+  if (!listEl) return;
+  const files = settings.resume?.resumeFiles || [];
+  if (files.length === 0) {
+    listEl.innerHTML = '<div style="font-size:11px;color:var(--text3)">暂无附件</div>';
+    return;
+  }
+  listEl.innerHTML = files.map((f, idx) => {
+    const sizeKB = (f.size / 1024).toFixed(1);
+    return `<div style="display:flex;align-items:center;padding:6px 8px;background:var(--card-bg);border-radius:4px;margin-top:4px;font-size:12px">
+      <span style="flex:1">📄 ${f.name} (${sizeKB} KB)</span>
+      <button onclick="openResumeFile(${idx})" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:11px;margin-right:8px">打开</button>
+      <button onclick="deleteResumeFile(${idx})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:11px">删除</button>
+    </div>`;
+  }).join('');
+}
+
+function openResumeFile(idx) {
+  const files = settings.resume?.resumeFiles || [];
+  const f = files[idx];
+  if (!f) return;
+  const filePath = path.join(CONFIG_DIR, 'resume_files', f.savedName);
+  try { shell.openPath(filePath); } catch(e) { alert('打开失败: ' + e.message); }
+}
+
+function deleteResumeFile(idx) {
+  if (!confirm('确定删除这个简历附件吗？')) return;
+  const files = settings.resume?.resumeFiles || [];
+  const f = files[idx];
+  if (f) {
+    const filePath = path.join(CONFIG_DIR, 'resume_files', f.savedName);
+    try { if (fs.existsSync(filePath)) fs.unlinkSync(filePath); } catch(e) {}
+  }
+  files.splice(idx, 1);
+  settings.resume.resumeFiles = files;
+  saveResume();
+  renderResumeFileList();
+}
+
+function renderQuickActions() {
+  const container = document.getElementById('aiQuickActions');
+  const prompts = QUICK_PROMPTS[aiCurrentTab] || [];
+  container.innerHTML = prompts.map(p=>`<button class="ai-quick-btn" onclick="quickAsk('${p.replace(/'/g,"\\'")}')">${p}</button>`).join('');
+  document.getElementById('interviewControl').style.display = aiCurrentTab === 'interview' ? '' : 'none';
+}
+
+function quickAsk(text) {
+  document.getElementById('aiInput').value = text;
+  sendAIMessage();
+}
+
+function startMockInterview() {
+  if (!settings.aiApiKey && settings.aiProvider !== 'ollama') {
+    alert('请先在设置页面配置 AI API Key');
+    return;
+  }
+  mockInterviewActive = true;
+  interviewAutoMode = true;
+  interviewStage = '自我介绍';
+  interviewQuestionCount = 0;
+  aiChatHistory.interview = [];
+  document.querySelector('.btn-start-interview').style.display = 'none';
+  document.querySelector('.btn-end-interview').style.display = '';
+  renderAIChat();
+  const area = document.getElementById('aiChatArea');
+  const r = aiContextRecordId ? records.find(x=>x.id===aiContextRecordId) : null;
+  const jobName = r ? `${r.company} ${r.position}` : '通用岗位';
+  const introText = `🎤 实时语音面试开始\n\n应聘岗位：${jobName}\n面试流程：自我介绍 → 项目深挖 → 专业技能 → 行为面试 → 反问环节\n\n我会自动提问和聆听，你直接说话回答即可。你好，我是今天的面试官，请先做一个1分钟的自我介绍。`;
+  const intro = document.createElement('div');
+  intro.className = 'ai-msg assistant';
+  intro.textContent = introText;
+  area.appendChild(intro);
+  aiChatHistory.interview.push({role:'assistant', content:introText});
+  interviewQuestionCount = 1;
+  area.scrollTop = area.scrollHeight;
+  // 朗读第一个问题，朗读完提示用户点击麦克风回答
+  interviewSpeak('你好，我是今天的面试官，请先做一个1分钟的自我介绍。', () => {
+    if (mockInterviewActive) {
+      updateInterviewStatus('👆 点击「开始回答」按钮，然后说话');
+      const sttBtn = document.getElementById('sttBtn');
+      if (sttBtn) { sttBtn.style.background = '#10b981'; sttBtn.style.color = '#fff'; sttBtn.style.borderColor = '#10b981'; }
+    }
+  });
+}
+
+function endMockInterview() {
+  mockInterviewActive = false;
+  interviewAutoMode = false;
+  interviewState = 'idle';
+  document.querySelector('.btn-start-interview').style.display = '';
+  document.querySelector('.btn-end-interview').style.display = 'none';
+  document.getElementById('finishBtn').style.display = 'none';
+  window.speechSynthesis?.cancel();
+  if (speechRecognition) { try { speechRecognition.stop(); } catch(e){} }
+  baiduStopListening();
+  updateInterviewStatus('');
+  const history = aiChatHistory.interview;
+  history.push({role:'user', content:`面试结束，请对我的整体表现进行专业点评。要求：
+1. 给出总体评分（满分100分）
+2. 分5个维度评分：表达能力、专业能力、项目经验、逻辑思维、岗位匹配度（每项满分20分）
+3. 指出3个优点
+4. 指出3个需要改进的地方，并给出具体改进建议
+5. 预测通过概率（高/中/低）及原因
+请用结构化的方式输出，简洁专业。`});
+  renderAIChat();
+  sendAIMessage();
+}
+
+function updateInterviewStatus(text) {
+  let el = document.getElementById('interviewStatusBar');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'interviewStatusBar';
+    el.style.cssText = 'text-align:center;padding:6px 16px;font-size:12px;color:var(--text2);background:var(--hover);border-top:1px solid var(--border)';
+    const inputArea = document.querySelector('.ai-input-area');
+    inputArea.parentNode.insertBefore(el, inputArea);
+  }
+  el.textContent = text;
+  el.style.display = text ? '' : 'none';
+}
+
+// ========== 语音功能 ==========
+let preferredVoice = null;
+
+function initVoices() {
+  const voices = window.speechSynthesis.getVoices();
+  const priorityNames = ['Microsoft', 'Xiaoxiao', 'Yunxi', 'Yunjian', 'Huihui', 'Yaoyao', 'Kangkang', 'Tingting'];
+  for (const name of priorityNames) {
+    const v = voices.find(v => v.lang.startsWith('zh') && v.name.includes(name));
+    if (v) { preferredVoice = v; return; }
+  }
+  const zhVoice = voices.find(v => v.lang.startsWith('zh'));
+  if (zhVoice) preferredVoice = zhVoice;
+}
+
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = initVoices;
+  initVoices();
+}
+
+// 带回调的TTS
+function interviewSpeak(text, onEnd) {
+  if (!window.speechSynthesis) { if (onEnd) onEnd(); return; }
+  interviewState = 'speaking';
+  updateInterviewStatus('🔊 面试官正在提问...');
+  window.speechSynthesis.cancel();
+  let processed = text.replace(/([。！？])/g, '$1 ').replace(/([，；])/g, '$1 ');
+  const utterance = new SpeechSynthesisUtterance(processed);
+  utterance.lang = 'zh-CN';
+  utterance.rate = 0.92;
+  utterance.pitch = 1.08;
+  utterance.volume = 1.0;
+  if (preferredVoice) utterance.voice = preferredVoice;
+  utterance.onend = () => { if (onEnd) onEnd(); };
+  utterance.onerror = () => { if (onEnd) onEnd(); };
+  window.speechSynthesis.speak(utterance);
+}
+
+function speak(text) {
+  if (!ttsEnabled || !window.speechSynthesis) return;
+  interviewSpeak(text, null);
+}
+
+function toggleTTS() {
+  ttsEnabled = !ttsEnabled;
+  const btn = document.getElementById('ttsBtn');
+  btn.classList.toggle('active', ttsEnabled);
+  btn.textContent = ttsEnabled ? '🔊 语音开' : '🔊 语音';
+  if (!ttsEnabled) window.speechSynthesis.cancel();
+}
+
+function toggleSTT() {
+  if (sttEnabled) {
+    // 正在聆听，点击则停止（但不提交，用户可以点作答完成提交）
+    stopSTT(true);
+    return;
+  }
+  // 开始回答
+  const sttBtn = document.getElementById('sttBtn');
+  if (sttBtn) { sttBtn.style.background = ''; sttBtn.style.color = ''; sttBtn.style.borderColor = ''; }
+  document.getElementById('finishBtn').style.display = '';
+  interviewStartListening();
+}
+
+// 面试专用：开始聆听用户回答
+function interviewStartListening() {
+  // 根据设置选择语音识别服务
+  if (settings.sttProvider === 'baidu') {
+    baiduStartListening();
+    return;
+  }
+  // 系统内置语音识别
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    updateInterviewStatus('⚠️ 不支持语音识别，请打字回答');
+    return;
+  }
+  window.speechSynthesis?.cancel();
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  speechRecognition = new SpeechRecognition();
+  speechRecognition.lang = 'zh-CN';
+  speechRecognition.continuous = true;
+  speechRecognition.interimResults = true;
+  speechRecognition.maxAlternatives = 1;
+
+  interviewState = 'listening';
+  sttEnabled = true;
+  lastSpeechTime = Date.now();
+  updateInterviewStatus('🎙️ 正在聆听，请回答...（说完点「作答完成」）');
+
+  const btn = document.getElementById('sttBtn');
+  if (btn) { btn.classList.add('recording'); btn.textContent = '🎙️ 聆听中...'; }
+
+  let finalText = '';
+
+  speechRecognition.onresult = (event) => {
+    lastSpeechTime = Date.now();
+    let interimText = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalText += transcript;
+      } else {
+        interimText += transcript;
+      }
+    }
+    const input = document.getElementById('aiInput');
+    input.value = finalText + interimText;
+    // 只显示识别结果，不自动提交，用户点击「作答完成」才提交
+  };
+
+  speechRecognition.onerror = (event) => {
+    console.error('语音识别错误:', event.error);
+    if (event.error === 'no-speech') {
+      // 没检测到语音，重启识别
+      try { speechRecognition.start(); } catch(e){}
+      return;
+    }
+    stopSTT(false);
+    updateInterviewStatus('⚠️ 语音识别出错: ' + event.error + '，请打字回答');
+  };
+
+  speechRecognition.onend = () => {
+    // 如果还在聆听状态且没有提交，自动重启（continuous模式有时会自动停止）
+    if (interviewState === 'listening' && sttEnabled) {
+      try { speechRecognition.start(); } catch(e){}
+    }
+  };
+
+  try {
+    speechRecognition.start();
+  } catch(e) {
+    console.error('启动识别失败:', e);
+  }
+}
+
+// 提交用户回答，进入下一轮
+function interviewSubmitAnswer() {
+  if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+  const input = document.getElementById('aiInput');
+  const text = input.value.trim();
+  if (!text) return;
+  stopSTT(false);
+  document.getElementById('finishBtn').style.display = 'none';
+  interviewState = 'processing';
+  updateInterviewStatus('⏳ 正在思考...');
+  input.value = '';
+  aiChatHistory.interview.push({role:'user', content:text});
+  renderAIChat();
+  // 调用AI生成下一个问题
+  interviewNextQuestion();
+}
+
+// 用户点击作答完成
+function finishAnswer() {
+  const text = document.getElementById('aiInput').value.trim();
+  if (!text) {
+    alert('还没有识别到你的回答，请先点击「开始回答」说话');
+    return;
+  }
+  interviewSubmitAnswer();
+}
+
+async function interviewNextQuestion() {
+  interviewState = 'thinking';
+  updateInterviewStatus('🤔 面试官正在思考下一个问题...');
+  try {
+    const messages = [
+      {role:'system', content: getSystemPrompt()},
+      ...aiChatHistory.interview.slice(-12).map(m=>({role:m.role, content:m.content}))
+    ];
+    const area = document.getElementById('aiChatArea');
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'ai-msg assistant loading';
+    loadingDiv.innerHTML = '<span></span><span></span><span></span>';
+    area.appendChild(loadingDiv);
+    area.scrollTop = area.scrollHeight;
+
+    let fullText = '';
+    await callAIStream(messages, (chunk)=>{
+      fullText += chunk;
+      loadingDiv.classList.remove('loading');
+      loadingDiv.textContent = fullText;
+      area.scrollTop = area.scrollHeight;
+    });
+    aiChatHistory.interview.push({role:'assistant', content:fullText});
+    interviewQuestionCount++;
+    // 朗读问题，朗读完提示用户点击麦克风回答
+    if (mockInterviewActive) {
+      interviewSpeak(fullText, () => {
+        if (mockInterviewActive) {
+          updateInterviewStatus('👆 点击「开始回答」按钮，然后说话');
+          const sttBtn = document.getElementById('sttBtn');
+          if (sttBtn) { sttBtn.style.background = '#10b981'; sttBtn.style.color = '#fff'; sttBtn.style.borderColor = '#10b981'; }
+        }
+      });
+    }
+  } catch(e) {
+    updateInterviewStatus('❌ 出错: ' + e.message);
+    mockInterviewActive = false;
+    interviewAutoMode = false;
+  }
+}
+
+function stopSTT(resetBtn) {
+  sttEnabled = false;
+  if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+  const btn = document.getElementById('sttBtn');
+  if (btn && resetBtn !== false) {
+    btn.classList.remove('recording');
+    btn.textContent = '🎙️ 开始回答';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+  }
+  if (speechRecognition) {
+    try { speechRecognition.stop(); } catch(e) {}
+    speechRecognition = null;
+  }
+  // 停止百度实时语音
+  baiduStopListening();
+  // 停止旧的媒体流（兼容）
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(t => t.stop());
+    mediaStream = null;
+  }
+  if (audioContext) {
+    try { audioContext.close(); } catch(e) {}
+    audioContext = null;
+  }
+}
+
+// ========== 百度语音识别（分段识别，稳定版） ==========
+let baiduAudioCtx = null;
+let baiduProcessor = null;
+let baiduSource = null;
+let baiduMediaStream = null;
+let baiduFinalText = '';
+let baiduAudioBuffer = [];
+let baiduSegmentTimer = null;
+let baiduSilenceTimer = null;
+let baiduLastSoundTime = 0;
+let baiduIsRecording = false;
+
+async function getBaiduToken() {
+  if (baiduToken && Date.now() - baiduTokenTime < 25*24*3600*1000) return baiduToken;
+  if (!settings.baiduApiKey || !settings.baiduSecretKey) {
+    throw new Error('请先在设置中配置百度 API Key 和 Secret Key');
+  }
+  const url = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${settings.baiduApiKey}&client_secret=${settings.baiduSecretKey}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.error) throw new Error('百度Token获取失败: ' + data.error_description);
+  baiduToken = data.access_token;
+  baiduTokenTime = Date.now();
+  return baiduToken;
+}
+
+// 百度语音：开始聆听（分段识别）
+async function baiduStartListening() {
+  if (!settings.baiduApiKey || !settings.baiduSecretKey) {
+    updateInterviewStatus('⚠️ 请先在设置中配置百度语音 API Key');
+    return;
+  }
+  try {
+    baiduFinalText = '';
+    baiduAudioBuffer = [];
+    baiduLastSoundTime = Date.now();
+    baiduIsRecording = true;
+    
+    interviewState = 'listening';
+    sttEnabled = true;
+    updateInterviewStatus('🎙️ 正在聆听，请回答...（说完点「作答完成」）');
+    const btn = document.getElementById('sttBtn');
+    if (btn) { btn.classList.add('recording'); btn.textContent = '🎙️ 聆听中...'; }
+    
+    // 先获取token，确保配置正确
+    await getBaiduToken();
+    
+    // 开始采集音频
+    baiduMediaStream = await navigator.mediaDevices.getUserMedia({ 
+      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true } 
+    });
+    baiduAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const actualRate = baiduAudioCtx.sampleRate;
+    baiduSource = baiduAudioCtx.createMediaStreamSource(baiduMediaStream);
+    baiduProcessor = baiduAudioCtx.createScriptProcessor(4096, 1, 1);
+    
+    baiduProcessor.onaudioprocess = (e) => {
+      if (!baiduIsRecording) return;
+      const input = e.inputBuffer.getChannelData(0);
+      // 重采样到16000Hz
+      const ratio = actualRate / 16000;
+      const targetLen = Math.floor(input.length / ratio);
+      const resampled = new Float32Array(targetLen);
+      let hasSound = false;
+      for (let i = 0; i < targetLen; i++) {
+        const s = input[Math.floor(i * ratio)];
+        resampled[i] = s;
+        if (Math.abs(s) > 0.01) hasSound = true;
+      }
+      baiduAudioBuffer.push(resampled);
+      if (hasSound) baiduLastSoundTime = Date.now();
+    };
+    
+    baiduSource.connect(baiduProcessor);
+    baiduProcessor.connect(baiduAudioCtx.destination);
+    
+    // 每4秒识别一段
+    baiduSegmentTimer = setInterval(() => {
+      if (baiduAudioBuffer.length > 0) {
+        const segment = baiduAudioBuffer;
+        baiduAudioBuffer = [];
+        const totalLen = segment.reduce((sum, arr) => sum + arr.length, 0);
+        if (totalLen > 1600) {
+          const merged = new Float32Array(totalLen);
+          let off = 0;
+          for (const arr of segment) { merged.set(arr, off); off += arr.length; }
+          const wav = floatToWAV(merged, 16000);
+          baiduRecognizeWAV(wav).then(text => {
+            if (text && text.trim()) {
+              baiduFinalText += text.trim();
+              document.getElementById('aiInput').value = baiduFinalText;
+              updateInterviewStatus('✅ 已识别: ' + baiduFinalText.slice(0, 30) + (baiduFinalText.length > 30 ? '...' : ''));
+            }
+          }).catch(e => {
+            console.error('分段识别失败:', e);
+          });
+        }
+      }
+    }, 4000);
+    
+  } catch(e) {
+    updateInterviewStatus('❌ 启动失败: ' + e.message);
+    baiduStopListening();
+  }
+}
+
+// Float32转WAV
+function floatToWAV(samples, sampleRate) {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+  const writeStr = (off, str) => { for (let i=0;i<str.length;i++) view.setUint8(off+i, str.charCodeAt(i)); };
+  writeStr(0, 'RIFF');
+  view.setUint32(4, 36 + samples.length * 2, true);
+  writeStr(8, 'WAVE');
+  writeStr(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeStr(36, 'data');
+  view.setUint32(40, samples.length * 2, true);
+  let off = 44;
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    off += 2;
+  }
+  return new Blob([buffer], { type: 'audio/wav' });
+}
+
+// 调用百度短语音识别
+async function baiduRecognizeWAV(wavBlob) {
+  const token = await getBaiduToken();
+  const arrayBuffer = await wavBlob.arrayBuffer();
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+  const res = await fetch('https://vop.baidu.com/server_api', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      format: 'wav',
+      rate: 16000,
+      channel: 1,
+      cuid: 'jobtracker_' + Date.now(),
+      token: token,
+      speech: base64,
+      len: arrayBuffer.byteLength,
+      dev_pid: 1537
+    })
+  });
+  const data = await res.json();
+  if (data.err_no !== 0) throw new Error(data.err_msg || ('错误码:' + data.err_no));
+  return data.result[0] || '';
+}
+
+// 停止百度语音识别
+function baiduStopListening() {
+  baiduIsRecording = false;
+  if (baiduSegmentTimer) { clearInterval(baiduSegmentTimer); baiduSegmentTimer = null; }
+  if (baiduSilenceTimer) { clearTimeout(baiduSilenceTimer); baiduSilenceTimer = null; }
+  if (baiduProcessor) {
+    try { baiduProcessor.disconnect(); } catch(e) {}
+    baiduProcessor = null;
+  }
+  if (baiduSource) {
+    try { baiduSource.disconnect(); } catch(e) {}
+    baiduSource = null;
+  }
+  if (baiduMediaStream) {
+    baiduMediaStream.getTracks().forEach(t => t.stop());
+    baiduMediaStream = null;
+  }
+  if (baiduAudioCtx) {
+    try { baiduAudioCtx.close(); } catch(e) {}
+    baiduAudioCtx = null;
+  }
+}
+
+function saveAISettings() {
+  settings.aiApiUrl = document.getElementById('aiApiUrl').value.trim();
+  settings.aiApiKey = document.getElementById('aiApiKey').value.trim();
+  settings.sttProvider = document.getElementById('sttProvider').value;
+  settings.baiduApiKey = document.getElementById('baiduApiKey').value.trim();
+  settings.baiduSecretKey = document.getElementById('baiduSecretKey').value.trim();
+  document.getElementById('baiduConfig').style.display = settings.sttProvider === 'baidu' ? '' : 'none';
+  if (document.getElementById('aiModelCustom').style.display !== 'none') {
+    settings.aiModel = document.getElementById('aiModelCustom').value.trim();
+  }
+  saveConfig();
+}
+
+async function testAIConnection() {
+  saveAISettings();
+  const statusEl = document.getElementById('aiTestStatus');
+  statusEl.style.display = 'block';
+  statusEl.className = 'ai-status';
+  statusEl.textContent = '正在测试连接...';
+  if (!settings.aiApiKey && settings.aiProvider !== 'ollama') {
+    statusEl.className = 'ai-status err';
+    statusEl.textContent = '❌ 请先填写 API Key';
+    return;
+  }
+  if (!settings.aiApiUrl) {
+    statusEl.className = 'ai-status err';
+    statusEl.textContent = '❌ 请填写 API 地址';
+    return;
+  }
+  try {
+    const res = await fetch(settings.aiApiUrl + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + settings.aiApiKey },
+      body: JSON.stringify({ model: settings.aiModel, messages: [{role:'user', content:'hi'}], max_tokens: 10 })
+    });
+    if (res.ok) {
+      statusEl.className = 'ai-status ok';
+      statusEl.textContent = '✅ 连接成功！可以使用 AI 助手了';
+    } else {
+      const data = await res.json().catch(()=>({}));
+      statusEl.className = 'ai-status err';
+      statusEl.textContent = '❌ 连接失败：' + (data.error?.message || res.status + ' ' + res.statusText);
+    }
+  } catch(e) {
+    statusEl.className = 'ai-status err';
+    statusEl.textContent = '❌ 连接失败：' + e.message;
+  }
+}
+
+function getResumeText() {
+  const r = settings.resume || {};
+  let text = '';
+  if (r.name) text += '基本信息：' + r.name + '\n';
+  if (r.education) text += '教育背景：' + r.education + '\n';
+  if (r.experience) text += '实习/工作经历：' + r.experience + '\n';
+  if (r.projects) text += '项目经历：' + r.projects + '\n';
+  if (r.skills) text += '专业技能：' + r.skills + '\n';
+  if (r.awards) text += '获奖经历：' + r.awards + '\n';
+  if (r.certificates) text += '证书/资格：' + r.certificates + '\n';
+  if (r.languages) text += '语言能力：' + r.languages + '\n';
+  if (r.clubs) text += '社团/学生工作：' + r.clubs + '\n';
+  if (r.jobIntention) text += '求职意向：' + r.jobIntention + '\n';
+  if (r.links) text += '个人链接：' + r.links + '\n';
+  if (r.selfEval) text += '自我评价：' + r.selfEval + '\n';
+  return text || '（用户尚未完善简历档案）';
+}
+
+function getSystemPrompt() {
+  const resumeText = getResumeText();
+  if (mockInterviewActive) {
+    const r = aiContextRecordId ? records.find(x=>x.id===aiContextRecordId) : null;
+    const jobInfo = r ? `公司：${r.company}\n岗位：${r.position}\n岗位描述：${r.jobDescription||'未填写'}` : '（未关联具体岗位，进行通用面试）';
+    return `你是一位资深的${r?.industry||'互联网'}行业面试官，拥有10年以上招聘经验，正在对候选人进行专业的结构化面试。
+
+候选人简历：
+${resumeText}
+
+应聘岗位：
+${jobInfo}
+
+当前面试阶段：${interviewStage || '自我介绍'}
+已提问数：${interviewQuestionCount}
+
+【面试规则】
+1. 严格按照5个阶段依次进行：自我介绍 → 项目深挖 → 专业技能 → 行为面试 → 反问环节
+2. 每个阶段问1-2个问题，循序渐进，由浅入深
+3. 每次只问一个问题，等候选人回答后再继续
+4. 问题要精准、有深度，贴合岗位要求和候选人简历，不要问泛泛而谈的问题
+5. 对候选人的回答可以简短追问（1次），但不要评价好坏
+6. 问题简洁明了，不超过50字，不要解释为什么问这个问题
+7. 进入新阶段时可以简短说明（如"接下来我们聊聊项目经历"）
+8. 用中文提问，语气专业但友好
+
+【当前阶段指导】
+- 自我介绍：让候选人做1分钟自我介绍
+- 项目深挖：针对简历中最相关的项目，深挖技术细节、难点、成果
+- 专业技能：考察岗位所需的核心技能和知识
+- 行为面试：用STAR法则考察解决问题、团队协作、抗压能力等
+- 反问环节：问候选人"你有什么想问我的吗？"`;
+  }
+  if (aiCurrentTab === 'data') {
+    const stats = {
+      total: records.length,
+      byStatus: {},
+      byIndustry: {},
+      byChannel: {},
+      byMonth: {}
+    };
+    records.forEach(r=>{
+      stats.byStatus[r.status] = (stats.byStatus[r.status]||0)+1;
+      stats.byIndustry[r.industry||'其他'] = (stats.byIndustry[r.industry||'其他']||0)+1;
+      stats.byChannel[r.channel] = (stats.byChannel[r.channel]||0)+1;
+      const month = r.date?.slice(0,7) || '未知';
+      stats.byMonth[month] = (stats.byMonth[month]||0)+1;
+    });
+    return `你是一个求职数据分析助手。用户的投递数据如下（JSON格式）：
+${JSON.stringify(stats)}
+请用简洁、有洞察力的方式回答用户关于投递数据的问题。回答控制在200字以内，重点突出，用中文回答。如果数据不足，直接说明。`;
+  }
+  if (aiContextRecordId) {
+    const r = records.find(x=>x.id===aiContextRecordId);
+    if (r) {
+      return `你是一个专业的求职顾问。
+候选人简历：
+${resumeText}
+当前投递记录：
+公司：${r.company}
+岗位：${r.position}
+行业：${r.industry||'其他'}
+状态：${r.status}
+薪资：${r.salary||'未填写'}
+地点：${r.location||'未填写'}
+岗位描述：${r.jobDescription||'未填写'}
+备注：${r.note||'无'}
+
+请根据这些信息回答用户的问题，给出专业、实用、简洁的建议。回答控制在300字以内，分点说明，用中文回答。`;
+    }
+  }
+  return `你是一个专业的求职顾问，帮助用户管理求职投递、准备面试、优化简历。
+候选人简历：
+${resumeText}
+用中文回答，简洁实用，控制在300字以内。`;
+}
+
+async function callAIStream(messages, onChunk) {
+  const res = await fetch(settings.aiApiUrl + '/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + settings.aiApiKey },
+    body: JSON.stringify({ model: settings.aiModel, messages, stream: true })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(()=>({}));
+    throw new Error(data.error?.message || res.status + ' ' + res.statusText);
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  while (true) {
+    const {done, value} = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, {stream: true});
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const json = JSON.parse(data);
+          const chunk = json.choices?.[0]?.delta?.content;
+          if (chunk) onChunk(chunk);
+        } catch(e) {}
+      }
+    }
+  }
+}
+
+function renderAIChat() {
+  const area = document.getElementById('aiChatArea');
+  const history = aiChatHistory[aiCurrentTab] || [];
+  if (history.length === 0) {
+    const welcomes = {
+      data: '你好！我可以帮你分析投递数据。试试问：「我投了多少家？通过率多少？」「哪个渠道回复率最高？」',
+      analyze: '请先在表格中点击某条记录的 🤖 按钮关联投递，然后我可以帮你分析岗位匹配度、给出投递建议。',
+      interview: '请先关联一条投递记录，我可以帮你预测面试问题、优化回答。',
+      resume: '请先关联一条投递记录，我可以帮你生成定制化求职信、优化简历。',
+      review: '请先关联一条投递记录，面试结束后我可以帮你整理复盘。'
+    };
+    area.innerHTML = `<div class="ai-msg assistant">${welcomes[aiCurrentTab]}</div>`;
+    return;
+  }
+  area.innerHTML = history.map(m=>`<div class="ai-msg ${m.role}">${m.content}</div>`).join('');
+  area.scrollTop = area.scrollHeight;
+}
+
+async function sendAIMessage() {
+  if (aiStreaming) return;
+  const input = document.getElementById('aiInput');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!settings.aiApiKey && settings.aiProvider !== 'ollama') {
+    alert('请先在设置页面配置 AI API Key');
+    return;
+  }
+  if (!settings.aiApiUrl) {
+    alert('请先在设置页面配置 API 地址');
+    return;
+  }
+  input.value = '';
+  const history = aiChatHistory[aiCurrentTab];
+  history.push({role:'user', content:text});
+  if (mockInterviewActive) interviewQuestionCount++;
+  renderAIChat();
+  aiStreaming = true;
+  document.getElementById('aiSendBtn').disabled = true;
+  const area = document.getElementById('aiChatArea');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'ai-msg assistant loading';
+  loadingDiv.innerHTML = '<span></span><span></span><span></span>';
+  area.appendChild(loadingDiv);
+  area.scrollTop = area.scrollHeight;
+  try {
+    const messages = [
+      {role:'system', content: getSystemPrompt()},
+      ...history.slice(-10).map(m=>({role:m.role, content:m.content}))
+    ];
+    let fullText = '';
+    loadingDiv.classList.remove('loading');
+    loadingDiv.textContent = '';
+    await callAIStream(messages, (chunk)=>{
+      fullText += chunk;
+      loadingDiv.textContent = fullText;
+      area.scrollTop = area.scrollHeight;
+    });
+    history.push({role:'assistant', content:fullText});
+    // 模拟面试模式下朗读并提示用户点击麦克风回答
+    if (mockInterviewActive && interviewAutoMode) {
+      interviewSpeak(fullText, () => {
+        if (mockInterviewActive) {
+          updateInterviewStatus('👆 点击「开始回答」按钮，然后说话');
+          const sttBtn = document.getElementById('sttBtn');
+          if (sttBtn) { sttBtn.style.background = '#10b981'; sttBtn.style.color = '#fff'; sttBtn.style.borderColor = '#10b981'; }
+        }
+      });
+    } else if (mockInterviewActive && ttsEnabled) {
+      speak(fullText);
+    }
+  } catch(e) {
+    loadingDiv.classList.remove('loading');
+    loadingDiv.textContent = '❌ 调用失败：' + e.message + '\n\n请检查 API Key 和网络连接，或在设置页面点击「测试连接」。';
+    history.push({role:'assistant', content:'❌ 调用失败：'+e.message});
+  }
+  aiStreaming = false;
+  document.getElementById('aiSendBtn').disabled = false;
+}
 
 function renderStats() {
   const total=records.length, assessment=records.filter(r=>['测评','笔试'].includes(r.status)).length, interview=records.filter(r=>['一面','二面','三面/终面'].includes(r.status)).length, offer=records.filter(r=>r.status==='Offer').length, rate=total>0?((offer/total)*100).toFixed(1):'0.0';
   document.getElementById('statsGrid').innerHTML=`<div class="stat-card blue"><div class="stat-label">总投递数</div><div class="stat-value">${total}</div></div><div class="stat-card orange"><div class="stat-label">测评/笔试</div><div class="stat-value">${assessment}</div></div><div class="stat-card indigo"><div class="stat-label">面试中</div><div class="stat-value">${interview}</div></div><div class="stat-card green"><div class="stat-label">Offer</div><div class="stat-value">${offer}</div></div><div class="stat-card purple"><div class="stat-label">通过率</div><div class="stat-value">${rate}%</div></div>`;
-  const allStatuses = getAllStatuses();
+  const allStatuses=getAllStatuses();
   const maxC=Math.max(...allStatuses.map(s=>records.filter(r=>r.status===s).length),1);
   document.getElementById('statusChart').innerHTML=allStatuses.map(s=>{const c=records.filter(r=>r.status===s).length;const color=STATUS_COLORS[s]||getOptColor('status',s);return`<div class="chart-bar"><div class="chart-bar-label">${s}</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(c/maxC)*100}%;background:${color}"></div></div><div class="chart-bar-value">${c}</div></div>`;}).join('');
   const days=[]; for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().split('T')[0]);}
   const maxD=Math.max(...days.map(d=>records.filter(r=>r.date===d).length),1);
-  document.getElementById('trendChart').innerHTML=days.map(d=>{const c=records.filter(r=>r.date===d).length;return`<div class="trend-bar"><div class="trend-bar-fill" style="height:${(c/maxD)*120}px"></div><div class="trend-bar-label">${d.slice(5)}</div><div style="font-size:11px;color:#6b7280">${c}</div></div>`;}).join('');
+  document.getElementById('trendChart').innerHTML=days.map(d=>{const c=records.filter(r=>r.date===d).length;return`<div class="trend-bar"><div class="trend-bar-fill" style="height:${(c/maxD)*120}px"></div><div class="trend-bar-label">${d.slice(5)}</div><div style="font-size:11px;color:var(--text3)">${c}</div></div>`;}).join('');
+  // 行业分布
+  const industries=getAllIndustries();
+  const industryCounts=industries.map(ind=>({name:ind,count:records.filter(r=>r.industry===ind).length})).filter(x=>x.count>0).sort((a,b)=>b.count-a.count);
+  const maxI=Math.max(...industryCounts.map(x=>x.count),1);
+  document.getElementById('industryChart').innerHTML=industryCounts.map(x=>`<div class="chart-bar"><div class="chart-bar-label">${x.name}</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(x.count/maxI)*100}%;background:${getOptColor('industry',x.name)}"></div></div><div class="chart-bar-value">${x.count}</div></div>`).join('')||'<div style="color:var(--text3);font-size:13px;padding:10px">暂无数据</div>';
+  // 岗位分布 TOP10
+  const posCounts={};
+  records.forEach(r=>{if(r.position)posCounts[r.position]=(posCounts[r.position]||0)+1;});
+  const topPos=Object.entries(posCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxP=Math.max(...topPos.map(x=>x[1]),1);
+  document.getElementById('positionChart').innerHTML=topPos.map(([name,count])=>`<div class="chart-bar"><div class="chart-bar-label" style="width:120px">${name.length>8?name.slice(0,8)+'..':name}</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(count/maxP)*100}%;background:#8b5cf6"></div></div><div class="chart-bar-value">${count}</div></div>`).join('')||'<div style="color:var(--text3);font-size:13px;padding:10px">暂无数据</div>';
 }
 
 function exportJSON() { downloadBlob(new Blob([JSON.stringify(records,null,2)],{type:'application/json'}),'投递记录备份_'+today()+'.json'); }
 function exportCSV() {
-  const headers=['公司名称','岗位','渠道','批次','投递日期','当前状态','薪资','地点','投递网址','备注','状态历史'];
-  const rows=records.map(r=>[r.company,r.position,r.channel,r.batch,r.date,r.status,r.salary||'',r.location||'',r.applyUrl||'',(r.note||'').replace(/\n/g,' '),(r.statusHistory||[]).map(h=>`${h.date}:${h.status}${h.note?'('+h.note+')':''}`).join(' → ')]);
+  const headers=['公司名称','岗位','行业','渠道','批次','投递日期','当前状态','薪资','地点','投递网址','备注','下次事项','状态历史'];
+  const rows=records.map(r=>[r.company,r.position,r.industry||'',r.channel,r.batch,r.date,r.status,r.salary||'',r.location||'',r.applyUrl||'',(r.note||'').replace(/\n/g,' '),r.nextEvent?`${r.nextEvent.title||''} ${r.nextEvent.date||''} ${r.nextEvent.time||''}`:'',(r.statusHistory||[]).map(h=>`${h.date}:${h.status}${h.note?'('+h.note+')':''}`).join(' → ')]);
   const csv='\uFEFF'+[headers,...rows].map(row=>row.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
   downloadBlob(new Blob([csv],{type:'text/csv'}),'投递记录_'+today()+'.csv');
 }
 function downloadBlob(blob,filename) { const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url;a.download=filename;a.click(); URL.revokeObjectURL(url); }
 function importJSON(e) {
   const file=e.target.files[0]; if(!file)return; const reader=new FileReader();
-  reader.onload=(ev)=>{try{const data=JSON.parse(ev.target.result);if(Array.isArray(data)){if(confirm(`确定导入 ${data.length} 条记录？这将覆盖当前所有数据。`)){records=data;saveAllData();renderTable();renderStats();alert('导入成功！');}}else alert('文件格式错误');}catch(err){alert('解析失败：'+err.message);}};
+  reader.onload=(ev)=>{try{const data=JSON.parse(ev.target.result);if(Array.isArray(data)){if(confirm(`确定导入 ${data.length} 条记录？这将覆盖当前所有数据。`)){records=data;saveAllData();renderTable();renderStats();renderUpcoming();alert('导入成功！');}}else alert('文件格式错误');}catch(err){alert('解析失败：'+err.message);}};
   reader.readAsText(file); e.target.value='';
 }
+
 document.getElementById('modalOverlay').onclick=(e)=>{if(e.target.id==='modalOverlay')closeModal();};
 
 try {
@@ -1078,17 +2720,26 @@ try {
   applyBorderStyle();
   applyFontSize();
   applyFontFamily();
+  applyDarkMode();
   applyColWidths();
+  applyColVisibility();
+  loadAISettings();
+  loadResume();
+  renderQuickActions();
   setupNav();
   setupFilterDropdown();
   setupColResize();
   setupScroll();
-  document.getElementById('f_date').value = today();
+  document.getElementById('f_date').value=today();
   renderTable();
   renderStats();
+  renderUpcoming();
+  // 每分钟检查提醒
+  setInterval(checkReminders, 60000);
+  checkReminders();
 } catch(e) {
   console.error('初始化失败:', e);
-  document.body.innerHTML = '<div style="padding:40px;font-family:sans-serif"><h2>应用初始化失败</h2><p>' + e.message + '</p><pre>' + e.stack + '</pre></div>';
+  document.body.innerHTML='<div style="padding:40px;font-family:sans-serif"><h2>应用初始化失败</h2><p>'+e.message+'</p><pre>'+e.stack+'</pre></div>';
 }
 </script>
 </body>

@@ -1,6 +1,5 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, session } = require('electron');
 const path = require('path');
-
 function createWindow() {
   const win = new BrowserWindow({
     width: 1280,
@@ -20,14 +19,25 @@ function createWindow() {
     return { action: 'deny' };
   });
 }
-
 app.whenReady().then(() => {
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === 'media' || permission === 'audioCapture' || permission === 'microphone') {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
+  session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
+    if (permission === 'media' || permission === 'audioCapture' || permission === 'microphone') {
+      return true;
+    }
+    return false;
+  });
   createWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
-
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });

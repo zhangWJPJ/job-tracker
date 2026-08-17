@@ -28,7 +28,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
@@ -39,5 +41,9 @@
       "createStartMenuShortcut": true,
       "shortcutName": "秋招投递管理助手"
     }
+  },
+  "dependencies": {
+    "mammoth": "^1.12.1",
+    "pdf-parse": "^2.4.5"
   }
 }
