@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "秋招投递管理助手",
+  "version": "1.0.0",
+  "description": "一键保存投递记录到秋招投递管理助手桌面软件",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["http://localhost:19876/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "保存投递记录"
+  }
+}

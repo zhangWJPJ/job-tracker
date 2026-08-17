@@ -672,7 +672,7 @@ th { -webkit-user-select: none; user-select: none; }
           </div>
           <div class="setting-row">
             <div class="setting-label">版本</div>
-            <div class="setting-control" style="padding-top:8px;color:var(--text2);font-size:13px">v2.5.4</div>
+            <div class="setting-control" style="padding-top:8px;color:var(--text2);font-size:13px">v2.6.0</div>
           </div>
           <div class="setting-row">
             <div class="setting-label">开发者</div>
@@ -1330,6 +1330,80 @@ function clearAllData() {
   if(!confirm('再次确认：真的要删除全部 '+records.length+' 条记录吗？')) return;
   records=[]; filters={company:[],industry:[],channel:[],batch:[],status:[],location:[]}; selectedIds.clear();
   saveAllData(); renderTable(); renderStats(); renderUpcoming(); alert('数据已清空');
+}
+
+// 处理浏览器插件发送的投递记录
+async function handleRecordFromExtension(data) {
+  try {
+    if (!data.company || !data.position) {
+      alert('插件发送的数据不完整：缺少公司或岗位名称');
+      return;
+    }
+    
+    // 检查是否重复
+    const exists = records.find(r => r.company === data.company && r.position === data.position);
+    if (exists) {
+      if (!confirm(`已存在相同记录：${data.company} - ${data.position}\n\n是否仍然添加？`)) return;
+    }
+    
+    let industry = data.industry || '其他';
+    
+    // 如果行业为空或"其他"，用AI判断
+    if ((!industry || industry === '其他') && settings.aiEnabled && settings.aiApiKey) {
+      try {
+        industry = await guessIndustryByAI(data.company, data.position, data.jobDescription || '');
+      } catch(e) {
+        console.warn('AI判断行业失败:', e);
+      }
+    }
+    
+    const newRecord = {
+      id: 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+      company: data.company,
+      position: data.position,
+      industry: industry,
+      channel: data.channel || '官网',
+      batch: data.batch || '校招',
+      status: data.status || '已投递',
+      salary: data.salary || '',
+      location: data.location || '',
+      applyUrl: data.applyUrl || '',
+      note: data.note || '',
+      jobDescription: data.jobDescription || '',
+      date: data.date || today(),
+      statusHistory: [{ status: data.status || '已投递', date: data.date || today(), note: '通过浏览器插件添加' }],
+      interviews: [],
+      nextEvent: { title: '', date: '', time: '', note: '' },
+      eventHistory: []
+    };
+    
+    records.push(newRecord);
+    saveAllData();
+    renderTable();
+    renderStats();
+    renderUpcoming();
+    
+    alert(`✅ 投递记录已保存！\n\n公司：${data.company}\n岗位：${data.position}\n行业：${industry}`);
+  } catch(e) {
+    alert('保存插件投递记录失败: ' + e.message);
+  }
+}
+
+// 用AI判断公司行业
+async function guessIndustryByAI(company, position, jobDescription) {
+  if (!settings.aiApiKey) return '其他';
+  
+  const prompt = `请根据以下信息判断该公司所属行业，只返回一个行业名称（如：互联网、金融、医疗健康、教育、制造业、消费品、房地产、能源、咨询、法律、媒体、政府/事业单位、其他），不要返回其他内容。\n\n公司名称：${company}\n岗位名称：${position}\n岗位描述：${(jobDescription || '').slice(0, 500)}`;
+  
+  try {
+    const result = await callAI(prompt, 100);
+    const industry = result.trim().replace(/[。\.]/g, '');
+    if (industry && industry.length < 20) return industry;
+    return '其他';
+  } catch(e) {
+    console.warn('AI判断行业失败:', e);
+    return '其他';
+  }
 }
 
 function saveRecord() {
@@ -2564,6 +2638,13 @@ ${resumeText}
 用中文回答，简洁实用，控制在300字以内。`;
 }
 
+async function callAI(prompt, maxTokens) {
+  let fullText = '';
+  const messages = [{ role: 'user', content: prompt }];
+  await callAIStream(messages, (chunk) => { fullText += chunk; });
+  return fullText;
+}
+
 async function callAIStream(messages, onChunk) {
   const res = await fetch(settings.aiApiUrl + '/chat/completions', {
     method: 'POST',
@@ -2734,6 +2815,15 @@ try {
   renderTable();
   renderStats();
   renderUpcoming();
+  // 监听浏览器插件发送的投递记录
+  if (typeof require !== 'undefined') {
+    try {
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.on('add-record-from-extension', (event, data) => {
+        handleRecordFromExtension(data);
+      });
+    } catch(e) { console.error('监听插件消息失败:', e); }
+  }
   // 每分钟检查提醒
   setInterval(checkReminders, 60000);
   checkReminders();

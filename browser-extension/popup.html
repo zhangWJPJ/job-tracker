@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { width: 380px; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; }
+    h3 { font-size: 16px; margin-bottom: 12px; color: #1e293b; display: flex; align-items: center; gap: 6px; }
+    .field { margin-bottom: 10px; }
+    .field label { display: block; font-size: 12px; color: #64748b; margin-bottom: 4px; font-weight: 500; }
+    .field input, .field select, .field textarea { width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: white; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.1); }
+    .field textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+    .row { display: flex; gap: 8px; }
+    .row .field { flex: 1; }
+    .btn { width: 100%; padding: 10px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500; margin-top: 8px; }
+    .btn:hover { background: #2563eb; }
+    .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+    .status { text-align: center; padding: 10px; border-radius: 6px; font-size: 13px; margin-top: 10px; display: none; }
+    .status.success { background: #dcfce7; color: #166534; display: block; }
+    .status.error { background: #fee2e2; color: #991b1b; display: block; }
+    .status.loading { background: #dbeafe; color: #1e40af; display: block; }
+    .hint { font-size: 11px; color: #94a3b8; text-align: center; margin-top: 8px; }
+    .auto-tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 10px; padding: 1px 6px; border-radius: 3px; margin-left: 4px; }
+  </style>
+</head>
+<body>
+  <h3>📋 保存投递记录</h3>
+  
+  <div class="field">
+    <label>公司名称 *</label>
+    <input type="text" id="company" placeholder="请输入公司名称">
+  </div>
+  
+  <div class="field">
+    <label>岗位名称 *</label>
+    <input type="text" id="position" placeholder="请输入岗位名称">
+  </div>
+  
+  <div class="row">
+    <div class="field">
+      <label>薪资</label>
+      <input type="text" id="salary" placeholder="如：15-25K">
+    </div>
+    <div class="field">
+      <label>地点</label>
+      <input type="text" id="location" placeholder="如：上海">
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="field">
+      <label>投递渠道</label>
+      <select id="channel">
+        <option value="官网">官网</option>
+        <option value="BOSS直聘">BOSS直聘</option>
+        <option value="智联招聘">智联招聘</option>
+        <option value="前程无忧">前程无忧</option>
+        <option value="拉勾网">拉勾网</option>
+        <option value="猎聘">猎聘</option>
+        <option value="内推">内推</option>
+        <option value="邮件">邮件</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>批次</label>
+      <select id="batch">
+        <option value="校招">校招</option>
+        <option value="实习">实习</option>
+        <option value="社招">社招</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="field">
+    <label>岗位描述（JD）</label>
+    <textarea id="jobDescription" placeholder="粘贴岗位描述，AI将据此判断行业"></textarea>
+  </div>
+  
+  <button class="btn" id="saveBtn">💾 保存到投递助手</button>
+  
+  <div class="status" id="status"></div>
+  
+  <div class="hint">需要先打开「秋招投递管理助手」桌面软件</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
